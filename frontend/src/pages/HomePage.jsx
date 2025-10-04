@@ -9,7 +9,7 @@ const HomePage = () => {
       {/* Navbar */}
       <nav className="bg-gradient-to-r from-blue-600 to-purple-600 p-4 shadow-md sticky top-0 z-50">
         <div className="max-w-7xl mx-auto flex justify-between items-center">
-          <h1 className="text-white text-2xl font-bold">AI DocumentFlow</h1>
+          <h1 className="text-white text-2xl font-bold">MindGrid</h1>
           <div className="space-x-4">
             <Link to="/login">
               <button className="bg-white text-blue-700 font-semibold px-4 py-2 rounded-lg hover:bg-blue-100 transition">

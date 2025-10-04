@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom"; // 👈 import
 import { useUser } from "../contexts/UserContext";
 
 const LoginPage = () => {
-  const { login } = useUser();
   const navigate = useNavigate(); // 👈 initialize
   const [formData, setFormData] = useState({
     email: "",

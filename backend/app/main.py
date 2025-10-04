@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import agents, tools, projects, resources
+from routes import agents, tools, projects, resources, auth
 
 app = FastAPI(
     title="Agent Benchmark API",
@@ -26,6 +26,7 @@ app.include_router(agents.router, prefix="/agents", tags=["Agents"])
 app.include_router(tools.router, prefix="/tools", tags=["Tools"])
 app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(resources.router, prefix="/resources", tags=["Resources"])
+app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 
 @app.get("/")
 def root():

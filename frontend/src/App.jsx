@@ -21,7 +21,6 @@ function App() {
           <Route path="/project/:id" element={<SingleProjectPage />} />
         </Routes>
       </BrowserRouter>
-      {/*<U/serProvider>*/}
       </>
     
   );
