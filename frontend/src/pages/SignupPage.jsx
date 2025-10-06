@@ -2,8 +2,7 @@ import React, { useState } from 'react';
 
 const SignupPage = () => {
   const [formData, setFormData] = useState({
-    username: '',
-    fullName: '',
+    full_name: '',
     email: '',
     password: '',
   });
@@ -19,33 +18,32 @@ const SignupPage = () => {
   };
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError('');
-    setSuccess(false);
+  e.preventDefault();
+  setLoading(true);
+  setError('');
+  setSuccess(false);
 
-    try {
-      const res = await fetch('http://localhost:3000/auth/register', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(formData),
-      });
+  try {
+    const res = await fetch('http://localhost:8000/auth/signup', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(formData),
+    });
 
-      if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || 'Registration failed');
-      }
-
-      setSuccess(true);
-      console.log('✅ Signup successful');
-      // Optionally redirect to login
-      // window.location.href = '/login';
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+    if (!res.ok) {
+      const errData = await res.json();
+      throw new Error(errData.detail || 'Registration failed');
     }
-  };
+
+    setSuccess(true);
+    setFormData({ full_name: '', email: '', password: '' });
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
+
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-100">
@@ -60,19 +58,9 @@ const SignupPage = () => {
 
         <input
           type="text"
-          name="username"
-          placeholder="Username"
-          value={formData.username}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 mb-3 border rounded"
-        />
-
-        <input
-          type="text"
-          name="fullName"
+          name="full_name"
           placeholder="Full Name"
-          value={formData.fullName}
+          value={formData.full_name}
           onChange={handleChange}
           required
           className="w-full px-3 py-2 mb-3 border rounded"

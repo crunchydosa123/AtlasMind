@@ -1,56 +1,80 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom"
 import Sidebar from "../components/Sidebar";
+import Navbar from "../components/Navbar";
+import { useUser } from "../contexts/UserContext";
 
 const ProjectsPage = () => {
   const [projects, setProjects] = useState([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [projectName, setProjectName] = useState("");
   const [projectDescription, setProjectDescription] = useState("");
+  const { user } = useUser();
   const navigate = useNavigate();
 
-  // Fetch projects from API
   useEffect(() => {
-    fetch("http://127.0.0.1:8000/projects/")
-      .then((res) => res.json())
-      .then((data) => {
-        // Assuming backend returns { projects: [...] }
-        setProjects(data.projects || []);
-      })
-      .catch((err) => console.error("Failed to fetch projects:", err));
-  }, []);
+  if (!user) return;
+
+  const fetchProjects = async () => {
+    try {
+      const res = await fetch("http://127.0.0.1:8000/projects/", {
+        headers: {
+          "Authorization": `Bearer ${user.token}`,
+        },
+      });
+
+      if (!res.ok) throw new Error("Failed to fetch projects");
+
+      const data = await res.json();
+      setProjects(data || []);
+    } catch (err) {
+      console.error("Failed to fetch projects:", err);
+    }
+  };
+
+  fetchProjects();
+}, [user]);
+
 
   const openModal = () => setIsModalOpen(true);
   const closeModal = () => setIsModalOpen(false);
 
-  const handleSave = () => {
-    // Send new project to API
-    fetch("http://127.0.0.1:8000/projects/", {
+  const handleSave = async () => {
+  if (!user) return;
+
+  try {
+    const res = await fetch("http://127.0.0.1:8000/projects/", {
       method: "POST",
-      headers: { "Content-Type": "application/json" },
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${user.token}`, // send token
+      },
       body: JSON.stringify({
         name: projectName,
         description: projectDescription,
       }),
-    })
-      .then((res) => res.json())
-      .then((data) => {
-        console.log(data);
-        setProjects((prev) => [...prev, ...data.data]);
-        closeModal();
-        setProjectName("");
-        setProjectDescription("");
-      })
-      .catch((err) => console.error("Failed to add project:", err));
-  };
+    });
+
+    if (!res.ok) throw new Error("Failed to add project");
+
+    const data = await res.json();
+    setProjects((prev) => [...prev, ...data.data]);
+    closeModal();
+    setProjectName("");
+    setProjectDescription("");
+  } catch (err) {
+    console.error(err);
+  }
+};
+
 
   return (
     <div className="h-screen w-screen">
       <div className="h-full w-full flex">
         <Sidebar />
 
-        {/* Main content */}
         <div className="w-4/5 h-full bg-gray-100 p-6">
+        <Navbar />
           <div className="flex justify-between items-center mb-4">
             <h3 className="text-2xl font-semibold">Projects</h3>
             <button
@@ -78,7 +102,6 @@ const ProjectsPage = () => {
         </div>
       </div>
 
-      {/* Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-gray-900 bg-opacity-25 z-50">
           <div className="bg-white rounded-lg shadow-lg w-1/3 p-6">

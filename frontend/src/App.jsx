@@ -10,7 +10,7 @@ function App() {
 
   return (
     <>
-    
+      <UserProvider>
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<HomePage />} />
@@ -21,6 +21,7 @@ function App() {
           <Route path="/project/:id" element={<SingleProjectPage />} />
         </Routes>
       </BrowserRouter>
+      </UserProvider>
       </>
     
   );

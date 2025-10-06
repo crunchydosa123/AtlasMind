@@ -18,7 +18,6 @@ const SingleProjectPage = () => {
     axios
       .get(`http://127.0.0.1:8000/resources/project/${projectId}`)
       .then((res) => {
-        console.log(res);
         setResources(res.data)})
       .catch((err) => console.error(err));
   }, []);

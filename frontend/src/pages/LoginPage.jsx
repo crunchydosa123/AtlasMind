@@ -1,94 +1,89 @@
-import React, { useState } from "react";
-import { useNavigate } from "react-router-dom"; // 👈 import
-import { useUser } from "../contexts/UserContext";
+import React from 'react'
+import { useForm } from 'react-hook-form'
+import { useUser } from '../contexts/UserContext'
+import { useNavigate } from 'react-router-dom';
 
 const LoginPage = () => {
-  const navigate = useNavigate(); // 👈 initialize
-  const [formData, setFormData] = useState({
-    email: "",
-    password: "",
-  });
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState("");
+  const { login } = useUser();
+  const navigate = useNavigate();
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm()
 
-  const handleChange = (e) => {
-    setFormData((prev) => ({
-      ...prev,
-      [e.target.name]: e.target.value,
-    }));
-  };
-
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    setLoading(true);
-    setError("");
-
+  const onSubmit = async (data) => {
     try {
-      const res = await fetch("http://localhost:3000/auth/login", {
-        method: "POST",
+      const res = await fetch('http://localhost:8000/auth/login', {
+        method: 'POST',
         headers: {
-          "Content-Type": "application/json",
+          'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
-      });
+        body: JSON.stringify(data),
+      })
 
+      const result = await res.json()
       if (!res.ok) {
-        const errData = await res.json();
-        throw new Error(errData.message || "Login failed");
+        throw new Error(result.detail || 'Login failed')
       }
 
-      const data = await res.json();
-      console.log("✅ Login successful:", data);
+      const userRes = await fetch('http://localhost:8000/auth/me', {
+        headers: {
+          'Authorization': `Bearer ${result.access_token}`,
+        },
+      });
+      const userData = await userRes.json();
 
-      login(data); // Save token + user in context
+      login({ token: result.access_token, ...userData.user });
+      navigate('/projects')
 
-      navigate("/projects"); // 👈 redirect after successful login
     } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
+      alert(err.message)
     }
-  };
+  }
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gray-100">
+    <div className="min-h-screen flex items-center justify-center bg-gray-50">
       <form
-        onSubmit={handleSubmit}
-        className="bg-white p-6 rounded shadow-md w-full max-w-sm"
+        onSubmit={handleSubmit(onSubmit)}
+        className="bg-white p-8 rounded-2xl shadow-md w-full max-w-sm"
       >
-        <h2 className="text-2xl font-semibold mb-4 text-center">Login</h2>
-        {error && <div className="text-red-500 text-sm mb-2">{error}</div>}
+        <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
 
-        <input
-          type="email"
-          name="email"
-          placeholder="Email"
-          value={formData.email}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 mb-3 border rounded"
-        />
+        <div className="mb-4">
+          <label className="block mb-2 font-medium">Email</label>
+          <input
+            type="email"
+            {...register('email', { required: 'Email is required' })}
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          {errors.email && (
+            <p className="text-red-500 text-sm mt-1">{errors.email.message}</p>
+          )}
+        </div>
 
-        <input
-          type="password"
-          name="password"
-          placeholder="Password"
-          value={formData.password}
-          onChange={handleChange}
-          required
-          className="w-full px-3 py-2 mb-3 border rounded"
-        />
+        <div className="mb-4">
+          <label className="block mb-2 font-medium">Password</label>
+          <input
+            type="password"
+            {...register('password', { required: 'Password is required' })}
+            className="w-full p-2 border rounded-md focus:outline-none focus:ring-2 focus:ring-blue-400"
+          />
+          {errors.password && (
+            <p className="text-red-500 text-sm mt-1">{errors.password.message}</p>
+          )}
+        </div>
 
         <button
           type="submit"
-          disabled={loading}
-          className="w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700"
+          disabled={isSubmitting}
+          className="w-full bg-blue-600 text-white py-2 rounded-md hover:bg-blue-700 transition"
         >
-          {loading ? "Logging in..." : "Login"}
+          {isSubmitting ? 'Logging in...' : 'Login'}
         </button>
       </form>
     </div>
-  );
-};
+  )
+}
 
-export default LoginPage;
+export default LoginPage
