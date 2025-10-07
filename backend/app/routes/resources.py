@@ -10,7 +10,7 @@ import os
 from io import BytesIO
 from dotenv import load_dotenv
 from datetime import datetime
-
+from app.services.neo4j_service import add_resource_to_graph
 load_dotenv()
 
 router = APIRouter()
@@ -22,7 +22,6 @@ SUPABASE_BUCKET = os.environ.get("SUPABASE_BUCKET", "resources")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 
-# ------------------ Helper ------------------
 def extract_text(file: UploadFile):
     file_ext = file.filename.split(".")[-1].lower()
     content = ""
@@ -50,7 +49,6 @@ def extract_text(file: UploadFile):
     return content.strip()
 
 
-# ------------------ Models ------------------
 class ResourceResponse(BaseModel):
     id: UUID
     created_by: UUID
@@ -62,7 +60,6 @@ class ResourceResponse(BaseModel):
     created_at: datetime
 
 
-# ------------------ Routes ------------------
 @router.get("/project/{project_id}", response_model=List[ResourceResponse])
 def get_resources_by_project(project_id: UUID):
     response = supabase.table("Resources").select("*").eq("project_id", str(project_id)).execute()
@@ -107,6 +104,8 @@ async def upload_resource(
         }
 
         db_resp = supabase.table("Resources").insert(insert_data).execute()
+        resource_id = db_resp.data[0]['id']
+        add_resource_to_graph(resource_id, file.filename, project_id)
 
         return {"message": "File uploaded and parsed successfully", "data": db_resp.data[0]}
 

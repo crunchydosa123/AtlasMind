@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routes import agents, tools, projects, resources, auth
+from app.routes import agents, tools, projects, resources, auth
 
 app = FastAPI(
     title="Agent Benchmark API",

@@ -1,6 +1,6 @@
 from fastapi import APIRouter
 from pydantic import BaseModel
-from services.agent_service import call_phi3mini
+from app.services.agent_service import call_phi3mini
 import uuid
 from uuid import UUID
 
