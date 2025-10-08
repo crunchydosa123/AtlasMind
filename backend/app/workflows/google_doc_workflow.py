@@ -13,7 +13,6 @@ creds_path = os.path.join(BASE_DIR, creds_path_var)
 
 google_agent = GoogleAgent(creds_json_path=creds_path)
 
-# Define the state structure
 class WorkflowState(TypedDict):
     project_id: str
     prompt: str
@@ -37,21 +36,16 @@ def run_agent_node(state: WorkflowState) -> WorkflowState:
     )
     return {"agent_result": result}
 
-# Create the workflow
 workflow = StateGraph(WorkflowState)
 
-# Add nodes
 workflow.add_node("fetch_context", fetch_context_node)
 workflow.add_node("run_google_agent", run_agent_node)
 
-# Add edges
 workflow.add_edge("fetch_context", "run_google_agent")
 workflow.add_edge("run_google_agent", END)
 
-# Set entry point
 workflow.set_entry_point("fetch_context")
 
-# Compile the graph
 app = workflow.compile()
 
 def run_google_doc_workflow(project_id: str, prompt: str):

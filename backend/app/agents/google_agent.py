@@ -7,12 +7,10 @@ import re
 
 class GoogleAgent(BaseAgent):
     def __init__(self, creds_json_path: str, gemini_api_key: str = None):
-        # Google Docs/Sheets credentials
         self.creds = Credentials.from_service_account_file(creds_json_path)
         self.docs_service = build("docs", "v1", credentials=self.creds)
         self.sheets_service = build("sheets", "v4", credentials=self.creds)
 
-        # GenAI client
         api_key = gemini_api_key or os.environ.get("GEMINI_API_KEY")
         if not api_key:
             raise ValueError("GEMINI_API_KEY is not set")
@@ -28,7 +26,6 @@ class GoogleAgent(BaseAgent):
     def run(self, project_id: str, context: dict, prompt: str):
         full_prompt = f"Project info: {context}\n\nTask: {prompt}"
 
-        # Call the GenAI model
         response = self.genai_client.models.generate_content(
             model="gemini-2.5-flash", contents=full_prompt
         )
@@ -36,9 +33,7 @@ class GoogleAgent(BaseAgent):
         llm_output = response.candidates[0].content.parts[0].text
 
 
-        # Update Google Doc if doc_id exists
         doc_id = context.get("doc_id")
-        #print("doc_id", doc_id)
         if doc_id:
             doc_id = self._extract_id(doc_id)
             print("Extracted Google Doc ID:", doc_id)
@@ -47,7 +42,6 @@ class GoogleAgent(BaseAgent):
                 documentId=doc_id, body={"requests": requests}
             ).execute()
 
-        # Update Google Sheet if sheet_id exists
         sheet_id = context.get("sheet_id")
         if sheet_id:
             self.sheets_service.spreadsheets().values().append(
