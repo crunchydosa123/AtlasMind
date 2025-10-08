@@ -5,6 +5,7 @@ import os, jwt
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from typing import List
+from app.workflows.google_doc_workflow import run_google_doc_workflow
 
 load_dotenv()
 router = APIRouter()
@@ -21,6 +22,10 @@ class ProjectRequest(BaseModel):
     name: str
     description: str | None = None
 
+class WorkflowRequest(BaseModel):
+    project_id: str
+    prompt: str
+
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
         payload = jwt.decode(token, SECRET_KEY, algorithms=["HS256"])
@@ -29,7 +34,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
         raise HTTPException(status_code=401, detail="Invalid token")
     
 @router.get("/", response_model=List[ProjectRequest])
-def get_projects(current_user: dict = Depends(get_current_user)):
+async def get_projects(current_user: dict = Depends(get_current_user)):
     response = supabase.table("Projects").select("*").eq("created_by", current_user["id"]).execute()
     if response.data:
         return response.data
@@ -47,3 +52,11 @@ def add_project(project: ProjectRequest, current_user: dict = Depends(get_curren
         raise HTTPException(status_code=400, detail=response.error.message)
 
     return {"message": "Project added", "data": response.data}
+
+@router.post("/write-to-docs")
+async def run_workflow(request: WorkflowRequest):
+    try:
+        result = run_google_doc_workflow(project_id=request.project_id, prompt=request.prompt)
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
