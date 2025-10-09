@@ -22,7 +22,6 @@ class WorkflowState(TypedDict):
 def fetch_context_node(state: WorkflowState) -> WorkflowState:
     """Fetch project context"""
     context = get_project_context(state["project_id"])
-    print(context)
     if not context:
         raise ValueError(f"No project found with id {state['project_id']}")
     return {"context": context}

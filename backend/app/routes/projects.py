@@ -6,6 +6,7 @@ from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from typing import List
 from app.workflows.google_doc_workflow import run_google_doc_workflow
+from app.workflows.mail_workflow import run_mail_workflow
 
 load_dotenv()
 router = APIRouter()
@@ -25,6 +26,11 @@ class ProjectRequest(BaseModel):
 class WorkflowRequest(BaseModel):
     project_id: str
     prompt: str
+
+class MailRequest(BaseModel):
+    project_id: str
+    prompt: str
+    recipient: str
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -57,6 +63,19 @@ def add_project(project: ProjectRequest, current_user: dict = Depends(get_curren
 async def run_workflow(request: WorkflowRequest):
     try:
         result = run_google_doc_workflow(project_id=request.project_id, prompt=request.prompt)
+        return {"status": "success", "result": result}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+
+@router.post("/send-mail")
+async def send_mail(request: MailRequest):
+    try:
+        result = run_mail_workflow(
+            project_id=request.project_id,
+            prompt=request.prompt,
+            recipient=request.recipient
+        )
         return {"status": "success", "result": result}
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
