@@ -43,7 +43,7 @@ const Dashboard = () => {
 
         <div>
           <div className="text-3xl mb-4">Projects</div>
-          <div className="w-full bg-gray-300 grid grid-cols-3 gap-4 p-4">
+          <div className="w-full bg-gray-400 grid grid-cols-3 gap-4 p-4">
             {projects.map((project, index) => (
               <ProjectCard
                 key={index}
