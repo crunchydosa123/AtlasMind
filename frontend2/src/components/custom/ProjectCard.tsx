@@ -17,6 +17,7 @@ interface ProjectCardProps {
 }
 
 export const ProjectCard = ({ imageUrl, title, description, avatars, onClick }: ProjectCardProps) => {
+  console.log(title, imageUrl)
   return (
     <Card>
       <CardHeader className="p-0">
