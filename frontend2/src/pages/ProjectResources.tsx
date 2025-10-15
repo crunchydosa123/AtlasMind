@@ -1,9 +1,6 @@
 import { AppSidebar } from "@/components/custom/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { ProjectCard } from "@/components/custom/ProjectCard";
-import NewProjectPopover from "@/components/custom/NewProjectPopover";
-import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Button } from "@/components/ui/button";
+import NewResourcePopover from "@/components/custom/NewResourcePopover";
 import {
   Table,
   TableBody,
@@ -13,9 +10,58 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table"
-import NewResourcePopover from "@/components/custom/NewResourcePopover";
+import { useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
+
+type Resource = {
+  id: string;
+  created_by: string;
+  project_id: string;
+  file_name: string;
+  file_type: string;
+  file_url: string;
+  parsed_text: string;
+  created_at: string;
+};
 
 const ProjectResources = () => {
+  const token = localStorage.getItem("token");
+  const { id: projectId } = useParams<{ id: string }>();
+  const [resources, setResources] = useState<Resource[]>([]);
+
+  const getProjectResources = async () => {
+    if (!projectId || !token) return [];
+
+    const res = await fetch(`http://127.0.0.1:8000/resources/project/${projectId}`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      console.error("Failed to fetch resources:", res.status);
+      return [];
+    }
+
+    const data = await res.json();
+    return data;
+  };
+
+  useEffect(() => {
+    const fetchProjectResources = async () => {
+      try {
+        const projResources = await getProjectResources();
+        setResources(projResources);
+      } catch (error: any) {
+        console.error("Error fetching resources:", error);
+      }
+    };
+
+    fetchProjectResources();
+  }, [projectId, token]);
+
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -25,11 +71,11 @@ const ProjectResources = () => {
         <div className="flex flex-col space-y-6">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-3xl font-bold">Project: 123</h1>
-
+            <h1 className="text-3xl font-bold">Project: {projectId}</h1>
           </div>
+
           <div className="flex justify-between">
-            <h1>Resources</h1>
+            <h1 className="text-lg font-semibold">Resources</h1>
             <NewResourcePopover />
           </div>
 
@@ -37,21 +83,38 @@ const ProjectResources = () => {
             <TableCaption>A list of your project resources.</TableCaption>
             <TableHeader>
               <TableRow>
-                <TableHead className="w-[100px]">Name</TableHead>
+                <TableHead className="w-[200px]">Name</TableHead>
                 <TableHead>Format</TableHead>
                 <TableHead>Content</TableHead>
                 <TableHead className="text-right">Uploaded on</TableHead>
                 <TableHead className="text-right">Uploaded by</TableHead>
               </TableRow>
             </TableHeader>
+
             <TableBody>
-              <TableRow>
-                <TableCell className="font-medium">Resource 1.docx</TableCell>
-                <TableCell>Document</TableCell>
-                <TableCell>Guidelines_doc.docx</TableCell>
-                <TableCell className="text-right">1 Oct 2025</TableCell>
-              </TableRow>
-            </TableBody>
+  {resources.length === 0 ? (
+    <TableRow>
+      <TableCell colSpan={5} className="text-center">
+        No resources found
+      </TableCell>
+    </TableRow>
+  ) : (
+    resources.map((res) => (
+      <TableRow key={res.id}>
+        <TableCell className="font-medium">{res.file_name}</TableCell>
+        <TableCell>{res.file_type}</TableCell>
+        <TableCell>
+          {res.parsed_text ? `${res.parsed_text.slice(0, 30)}${res.parsed_text.length > 30 ? "..." : ""}` : "-"}
+        </TableCell>
+        <TableCell className="text-right">
+          {new Date(res.created_at).toLocaleDateString()}
+        </TableCell>
+        <TableCell className="text-right">{res.created_by}</TableCell>
+      </TableRow>
+    ))
+  )}
+</TableBody>
+
           </Table>
         </div>
       </main>

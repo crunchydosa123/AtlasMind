@@ -22,6 +22,8 @@ ALGORITHM = os.environ.get("JWT_ALGORITHM")
 class ProjectRequest(BaseModel):
     name: str
     description: str | None = None
+    sheet_id: str | None = None
+    doc_id: str | None = None
 
 class ProjectResponse(BaseModel):
     name: str

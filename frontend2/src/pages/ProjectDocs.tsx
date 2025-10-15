@@ -14,7 +14,6 @@ const ProjectDocs = () => {
   const handleSend = () => {
     if (!prompt.trim()) return;
     setMessages([...messages, { role: "user", content: prompt }]);
-    // Simulate bot response
     setMessages(prev => [
       ...prev,
       { role: "user", content: prompt },
