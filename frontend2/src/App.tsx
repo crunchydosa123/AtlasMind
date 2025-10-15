@@ -5,6 +5,7 @@ import Dashboard from "./pages/Dashboard"
 import Project from "./pages/Project"
 import ProjectResources from "./pages/ProjectResources"
 import ProjectDocs from "./pages/ProjectDocs"
+import AllResources from "./pages/AllResources"
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
         <Route path="/signup" element={<Signup />} />
 
         <Route path="/projects" element={<Dashboard />} />
+        <Route path="/resources" element={<AllResources />} />
 
         {/*Single Project Routes*/}
         <Route path="/project/:id" element={<Project />} />

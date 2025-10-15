@@ -12,8 +12,9 @@ interface ProjectCardProps {
   imageUrl: string
   title: string
   description: string
-  avatars: AvatarData[]
+  avatars?: AvatarData[]
   onClick?: () => void
+  id: string
 }
 
 export const ProjectCard = ({ imageUrl, title, description, avatars, onClick }: ProjectCardProps) => {
@@ -32,14 +33,14 @@ export const ProjectCard = ({ imageUrl, title, description, avatars, onClick }: 
         <CardTitle>{title}</CardTitle>
         <CardDescription>{description}</CardDescription>
 
-        <div className="flex -space-x-3 mt-2">
+        {/*<div className="flex -space-x-3 mt-2">
           {avatars.map((avatar, index) => (
             <Avatar key={index} className="h-10 w-10 border-2 border-background">
               <AvatarImage src={avatar.src} alt={avatar.alt} />
               <AvatarFallback>{avatar.fallback}</AvatarFallback>
             </Avatar>
           ))}
-        </div>
+        </div>*/}
       </CardContent>
 
       <CardFooter>

@@ -23,6 +23,11 @@ class ProjectRequest(BaseModel):
     name: str
     description: str | None = None
 
+class ProjectResponse(BaseModel):
+    name: str
+    description: str | None = None
+    id: str
+
 class WorkflowRequest(BaseModel):
     project_id: str
     prompt: str
@@ -39,7 +44,7 @@ def get_current_user(token: str = Depends(oauth2_scheme)):
     except Exception:
         raise HTTPException(status_code=401, detail="Invalid token")
     
-@router.get("/", response_model=List[ProjectRequest])
+@router.get("/", response_model=List[ProjectResponse])
 async def get_projects(current_user: dict = Depends(get_current_user)):
     response = supabase.table("Projects").select("*").eq("created_by", current_user["id"]).execute()
     if response.data:
