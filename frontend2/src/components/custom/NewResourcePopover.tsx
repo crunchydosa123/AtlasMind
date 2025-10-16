@@ -4,8 +4,11 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useState } from "react";
+import { useParams, useSearchParams } from "react-router-dom";
 
 const NewResourcePopover = () => {
+  const token = localStorage.getItem("token");
+  const { id: projectId } = useParams<{ id: string }>();
   const [files, setFiles] = useState<File[]>([]);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -13,6 +16,38 @@ const NewResourcePopover = () => {
       setFiles(Array.from(e.target.files));
     }
   };
+
+  const uploadResource = async () => {
+    if (files.length === 0) {
+      alert("Please select a file to upload");
+      return;
+    }
+
+    const formData = new FormData();
+    formData.append("project_id", projectId!);
+    formData.append("file", files[0]);
+
+    try {
+      const res = await fetch("http://127.0.0.1:8000/resources/upload", {
+        method: "POST",
+        headers: {
+          "Authorization": `Bearer ${token}`,
+        },
+        body: formData
+      });
+
+      const data = await res.json()
+      if (!res.ok) {
+        throw new Error(data.detail || "Upload failed");
+      }
+
+      console.log('file uploaded successfully', data)
+      alert("File uploaded successfully!");
+    } catch (err) {
+      console.error("Upload error:", err);
+      alert("Error uploading file");
+    }
+  }
 
   return (
     <Popover modal={true}>
@@ -63,7 +98,7 @@ const NewResourcePopover = () => {
               </CardContent>
 
               <CardFooter>
-                <Button className="w-full" variant="default">
+                <Button className="w-full" variant="default" onClick={uploadResource}>
                   Create Resource
                 </Button>
               </CardFooter>

@@ -7,6 +7,7 @@ from fastapi.security import OAuth2PasswordBearer
 from typing import List
 from app.workflows.google_doc_workflow import run_google_doc_workflow
 from app.workflows.mail_workflow import run_mail_workflow
+from app.services.neo4j_service import add_project_to_graph
 
 load_dotenv()
 router = APIRouter()
@@ -61,6 +62,9 @@ def add_project(project: ProjectRequest, current_user: dict = Depends(get_curren
     project_data["created_by"] = current_user["id"]
 
     response = supabase.table("Projects").insert(project_data).execute()
+    project_id = response.data[0]["id"]
+    project_name = response.data[0]["name"]
+    add_project_to_graph(project_id, project_name)
     if not response.data:
         raise HTTPException(status_code=400, detail=response.error.message)
 

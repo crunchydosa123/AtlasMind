@@ -19,6 +19,7 @@ const Dashboard = () => {
 
   const getProjects = async () => {
     const token = localStorage.getItem("token");
+    console.log(token);
 
     if (!token) {
       throw new Error("No token found. Please login.");
