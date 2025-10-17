@@ -95,4 +95,4 @@ def add_project_to_graph(project_id, project_name):
         session.execute_write(create_project, project_id, project_name)
 
 def close_driver():
-    driver.close()
+    driver.close() #only once after app closeS
