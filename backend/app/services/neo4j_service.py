@@ -100,11 +100,13 @@ def get_project_graph(project_id: str):
             links = []
 
             for record in result:
-                print(record)
-                # Add Project node
                 p = record["p"]
-                if p["id"] not in nodes:
-                    nodes[p["id"]] = {"id": p["id"], "label": p["name"], "group": "Project"}
+                c = record["c"]
+                res = record["res"]
+
+                if c and res:
+                    links.append({"source": res["id"], "target": c["id"]})
+               
                 
                 # Add Resource node
                 res = record["res"]

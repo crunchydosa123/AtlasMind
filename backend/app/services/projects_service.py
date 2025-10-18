@@ -5,7 +5,6 @@ import os
 load_dotenv()
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
-print(SUPABASE_URL)
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 def get_project_context(project_id: str) -> dict:

@@ -59,7 +59,7 @@ const KnowledgeGraph = (props: Props) => {
           linkDirectionalArrowLength={4}
           linkDirectionalArrowRelPos={1}
           linkColor={() => "#000000"}
-          linkWidth={10}
+          linkWidth={2}
           linkDirectionalParticles={2}
           linkDirectionalParticleSpeed={0.005}
           nodeCanvasObject={(node, ctx, globalScale) => {
