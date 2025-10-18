@@ -1,4 +1,5 @@
 from neo4j import GraphDatabase
+from fastapi import HTTPException
 import os
 from dotenv import load_dotenv
 import spacy
@@ -85,6 +86,52 @@ def add_resource_with_concepts(resource_id, resource_name, project_id, concepts,
         for concept in concepts:
             session.execute_write(link_resource_to_concept, resource_id, concept)
 
+def get_project_graph(project_id: str):
+    try:
+        with driver.session() as session:
+            result = session.run("""
+                MATCH (p:Project {id: $project_id})
+                OPTIONAL MATCH (p)-[r1:HAS_RESOURCE]->(res:Resource)
+                OPTIONAL MATCH (res)-[r2:COVERS]->(c:Concept)
+                RETURN p, r1, res, r2, c
+            """, project_id=project_id)
+            
+            nodes = {}
+            links = []
+
+            for record in result:
+                print(record)
+                # Add Project node
+                p = record["p"]
+                if p["id"] not in nodes:
+                    nodes[p["id"]] = {"id": p["id"], "label": p["name"], "group": "Project"}
+                
+                # Add Resource node
+                res = record["res"]
+                if res:
+                    if res["id"] not in nodes:
+                        nodes[res["id"]] = {"id": res["id"], "label": res["name"], "group": "Resource"}
+                    # Add HAS_RESOURCE link
+                    r1 = record["r1"]
+                    if r1:
+                        links.append({"source": p["id"], "target": res["id"], "type": r1.type})
+                
+                # Add Concept node
+                c = record["c"]
+                #print(c)
+                if c:
+                    if c["id"] not in nodes:
+                        nodes[c["id"]] = {"id": c["id"], "label": c["name"], "group": "Concept"}
+                    # Add COVERS link
+                    r2 = record["r2"]
+                    if r2:
+                        links.append({"source": res["id"], "target": c["id"], "type": r2.type})
+
+            return {"nodes": list(nodes.values()), "links": links}
+
+    except Exception as e:
+        print("Error fetching graph:", e)
+        return {"nodes": [], "links": []}
 
 def add_resource_to_graph(resource_id, resource_name, project_id, uploaded_by=None):
     with driver.session() as session:

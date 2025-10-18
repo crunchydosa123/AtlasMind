@@ -4,8 +4,12 @@ import { ProjectCard } from "@/components/custom/ProjectCard";
 import NewProjectPopover from "@/components/custom/NewProjectPopover";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useParams } from "react-router-dom";
+import KnowledgeGraph from "@/components/custom/KnowlegdeGraph";
 
 const Project = () => {
+  const params = useParams()
+  console.log("projectId: ", params.id);
   return (
     <SidebarProvider>
       <AppSidebar />
@@ -67,12 +71,7 @@ const Project = () => {
 
           {/* Knowledge Graph and Recent Activity */}
           <section className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-            <Card className="h-64">
-              <CardHeader>
-                <CardTitle>Knowledge Graph</CardTitle>
-                <CardDescription>Visual representation of project entities and relationships</CardDescription>
-              </CardHeader>
-            </Card>
+            <KnowledgeGraph project_id={params.id} />
 
             <Card className="h-64">
               <CardHeader>
