@@ -24,4 +24,4 @@ def get_project_context(project_id: str) -> dict:
         "name": project.get("name"),
         "description": project.get("description"),
     }
-    return context
+    return context #return context
