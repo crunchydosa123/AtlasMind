@@ -134,6 +134,22 @@ def get_project_graph(project_id: str):
     except Exception as e:
         print("Error fetching graph:", e)
         return {"nodes": [], "links": []}
+    
+def run_cypher_query(cypher_query: str):
+    with driver.session() as session:
+        results = session.run(cypher_query)
+        data = [record.data() for record in results]
+
+        if not data:
+            return {
+                "message": "No data found for your query.",
+                "cypher_query": cypher_query,
+                "results": []
+            }
+        else:
+            return {
+                "results": data
+            }
 
 def add_resource_to_graph(resource_id, resource_name, project_id, uploaded_by=None):
     with driver.session() as session:

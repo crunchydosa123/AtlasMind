@@ -25,3 +25,19 @@ def get_project_context(project_id: str) -> dict:
         "description": project.get("description"),
     }
     return context #return context
+
+def get_resource_text(resource_id: str):
+    response = supabase.table("Resources").select("*").eq("id", resource_id).execute()
+    data = response.data
+    print("data:", response)
+    if not data:
+        return None
+    
+    text = data[0]
+
+    parsed_text = {
+        "resource_id": resource_id,
+        "parsed_text": text.get("parsed_text")
+    }
+
+    return parsed_text
