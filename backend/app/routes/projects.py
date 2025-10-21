@@ -40,6 +40,8 @@ class ProjectResponse(BaseModel):
     name: str
     description: str | None = None
     id: str
+    doc_id: str | None = None
+    sheet_id: str | None = None
 
 class WorkflowRequest(BaseModel):
     project_id: str

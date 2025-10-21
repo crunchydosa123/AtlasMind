@@ -9,44 +9,65 @@ import {
 } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
+import { useUser } from "@/contexts/UserContext"
+import { useNavigate } from "react-router-dom"
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
   const [password, setPassword] = useState("")
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState("")
+  const { user, setUser } = useUser();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault()
-    setLoading(true)
-    setError("")
+  e.preventDefault();
+  setLoading(true);
+  setError("");
 
-    try {
-      const res = await fetch("http://localhost:8000/auth/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      })
+  try {
+    const res = await fetch("http://localhost:8000/auth/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ email, password }),
+    });
 
-      const data = await res.json()
+    const data = await res.json();
 
-      if (!res.ok) {
-        throw new Error(data.message || "Login failed")
-      }
+    if (!res.ok) throw new Error(data.message || "Login failed");
 
-      console.log(data.access_token);
-      localStorage.setItem("token", data.access_token)
+    // Store token
+    localStorage.setItem("token", data.access_token);
 
-      alert("Login successful!")
-      window.location.href = "/projects"
-    } catch (err: any) {
-      setError(err.message)
-    } finally {
-      setLoading(false)
-    }
+    // Fetch user info
+    const userRes = await fetch("http://localhost:8000/auth/me", {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${data.access_token}`,
+      },
+    });
+
+    const userData = await userRes.json();
+    const selfData = userData.user
+    console.log(selfData)
+    setUser({
+      id: selfData.id,
+      email: selfData.email,
+      name: selfData.full_name
+    });
+
+    console.log(user)
+
+    alert("Login successful!");
+    navigate('/projects')
+  } catch (err: any) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
   }
+};
+
 
   return (
     <Card className="w-full max-w-sm">

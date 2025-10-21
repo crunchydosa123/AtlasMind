@@ -66,7 +66,7 @@ def login(user: UserLogin):
 
     token = create_access_token({"user_id": res.data["id"], "email": user.email})
 
-    return {"access_token": token, "token_type": "bearer"}
+    return {"access_token": token, "token_type": "bearer" }
 
 @router.get("/me")
 def get_me(request: Request):

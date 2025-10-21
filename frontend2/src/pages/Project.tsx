@@ -6,8 +6,10 @@ import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/comp
 import { Button } from "@/components/ui/button";
 import { useParams } from "react-router-dom";
 import KnowledgeGraph from "@/components/custom/KnowlegdeGraph";
+import { useProjectContext } from "@/contexts/ProjectContext";
 
 const Project = () => {
+  const { id, name, doc_url } = useProjectContext()
   const params = useParams()
   console.log("projectId: ", params.id);
   return (
@@ -19,7 +21,7 @@ const Project = () => {
         <div className="flex flex-col space-y-6">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-3xl font-bold">Project: 123</h1>
+            <h1 className="text-3xl font-bold">{name}</h1>
             
           </div>
 

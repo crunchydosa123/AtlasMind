@@ -4,11 +4,13 @@ import { ProjectCard } from "@/components/custom/ProjectCard";
 import NewProjectPopover from "@/components/custom/NewProjectPopover";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { useProjectContext } from "@/contexts/ProjectContext";
 
 type Project = {
+  id: string;
   name: string;
   description: string;
-  id: string;
+  doc_url?: string;
   imageUrl?: string;
   avatars?: string[];
 };
@@ -16,11 +18,21 @@ type Project = {
 const Dashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const { setProject } = useProjectContext();
 
+  const selectProjectAndRedirect = (project: Project) => {
+    setProject?.({
+      id: project.id,
+      name: project.name,
+      doc_url: project.doc_url || "",
+    });
+
+    navigate(`/project/${project.id}`);
+  };
+
+  // Fetch projects from backend
   const getProjects = async () => {
     const token = localStorage.getItem("token");
-    console.log(token);
-
     if (!token) {
       throw new Error("No token found. Please login.");
     }
@@ -29,7 +41,7 @@ const Dashboard = () => {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
-        "Authorization": `Bearer ${token}`,
+        Authorization: `Bearer ${token}`,
       },
     });
 
@@ -46,7 +58,6 @@ const Dashboard = () => {
       try {
         const data = await getProjects();
         setProjects(data);
-        console.log("Fetched projects:", data);
       } catch (err: any) {
         console.error("Error fetching projects:", err);
       }
@@ -69,12 +80,12 @@ const Dashboard = () => {
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
           {projects.map((project) => (
             <ProjectCard
-              id = {project.id}
               key={project.id}
+              id={project.id}
               title={project.name}
               description={project.description}
               imageUrl={project.imageUrl || "/assets/image1.jpg"}
-              onClick={()=> navigate(`/project/${project.id}`)}
+              onClick={() => selectProjectAndRedirect(project)}
             />
           ))}
         </div>

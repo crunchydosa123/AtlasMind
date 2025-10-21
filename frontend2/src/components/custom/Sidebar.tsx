@@ -11,6 +11,10 @@ import {
   SidebarMenuButton,
   SidebarMenuItem,
 } from "@/components/ui/sidebar";
+import { useUser } from "@/contexts/UserContext";
+import { Card } from "../ui/card";
+import { DropdownMenu, DropdownMenuContent, DropdownMenuLabel, DropdownMenuTrigger } from "@radix-ui/react-dropdown-menu";
+import { Button } from "../ui/button";
 
 const items = [
   { title: "Projects", url: "/projects", icon: Home },
@@ -20,6 +24,7 @@ const items = [
 ];
 
 export function AppSidebar() {
+  const { user } = useUser()
   const location = useLocation();
 
   return (
@@ -50,7 +55,19 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
 
-      <SidebarFooter>User</SidebarFooter>
+      <SidebarFooter>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild><Button variant={'outline'}>{user?.name} </Button></DropdownMenuTrigger>
+            <DropdownMenuContent>
+              <Card className="bg-0">
+                <DropdownMenuLabel className="p-4">
+                  <Button>Logout</Button>
+                </DropdownMenuLabel>
+              </Card>
+              
+            </DropdownMenuContent>
+          </DropdownMenu>
+        </SidebarFooter>
     </Sidebar>
   );
 }
