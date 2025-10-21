@@ -65,3 +65,29 @@ async def query_neo4j_with_llm(user_query: str):
         cypher_text = cypher_text.replace("```cypher", "").replace("```", "").strip()
 
   return cypher_text
+
+async def generate_llm_response(user_query: str, context: dict):
+    context_text = "\n\n".join(
+        [f"{k}:\n{v}" for k, v in context.items()]
+    )
+
+    prompt = f"""
+      You are an AI assistant helping a user explore project documents.
+      You are given contextual excerpts from resources in a Neo4j database.
+      Use them to answer the user's question truthfully.
+
+      User query:
+      {user_query}
+
+      Context (from related resources):
+      {context_text}
+
+      Respond concisely, citing which resources you used.
+      """
+
+    response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
+
+    return response.candidates[0].content.parts[0].text

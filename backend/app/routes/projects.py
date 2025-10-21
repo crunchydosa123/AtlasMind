@@ -8,9 +8,19 @@ from typing import List
 from app.workflows.google_doc_workflow import run_google_doc_workflow
 from app.workflows.mail_workflow import run_mail_workflow
 from app.services.neo4j_service import add_project_to_graph
+from app.services.google_docs_service import GoogleDocsService
 
 load_dotenv()
 router = APIRouter()
+
+creds_path_var = os.environ.get("GOOGLE_CREDS_JSON")
+if not creds_path_var:
+    raise ValueError("GOOGLE_CREDS_JSON environment variable not set")
+
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+creds_path = os.path.join(BASE_DIR, creds_path_var)
+
+google_docs_service = GoogleDocsService(creds_path)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
@@ -39,6 +49,10 @@ class MailRequest(BaseModel):
     project_id: str
     prompt: str
     recipient: str
+
+class PushRequest(BaseModel):
+    text: str
+    doc_url: str | None = None
 
 def get_current_user(token: str = Depends(oauth2_scheme)):
     try:
@@ -76,6 +90,19 @@ async def run_workflow(request: WorkflowRequest):
         result = run_google_doc_workflow(project_id=request.project_id, prompt=request.prompt)
         return {"status": "success", "result": result}
     except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
+    
+@router.post("/push-to-docs")
+async def push_to_doc(req: PushRequest):
+    print("Raw request body:", req.dict())  # This shows exactly what was sent
+
+    DOC_URL = "https://docs.google.com/document/d/1vtMczJJVY0IRsqAawL-ORcBS9Bbc2wv0TaAPrjaU92g/edit"
+    
+    try:
+        result = google_docs_service.append_text(DOC_URL, req.text)
+        return result
+    except Exception as e:
+        print(e)
         raise HTTPException(status_code=500, detail=str(e))
     
 
