@@ -8,6 +8,7 @@ import ProjectDocs from "./pages/ProjectDocs";
 import AllResources from "./pages/AllResources";
 import { ProjectProvider } from "./contexts/ProjectContext";
 import { UserProvider } from "./contexts/UserContext";
+import Homepage from "./pages/Homepage";
 
 function App() {
   return (
@@ -15,6 +16,7 @@ function App() {
     <ProjectProvider>
       <Router>
         <Routes>
+          <Route path="/" element={<Homepage />} />
           {/* Auth */}
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
