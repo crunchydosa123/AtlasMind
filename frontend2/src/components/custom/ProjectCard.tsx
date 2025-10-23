@@ -21,13 +21,7 @@ export const ProjectCard = ({ imageUrl, title, description, avatars, onClick }: 
   console.log(title, imageUrl)
   return (
     <Card>
-      <CardHeader className="p-0">
-        <img
-          src={imageUrl}
-          alt={title}
-          className="w-full h-40 object-cover rounded-t-xl"
-        />
-      </CardHeader>
+
 
       <CardContent>
         <CardTitle>{title}</CardTitle>

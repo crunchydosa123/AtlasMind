@@ -12,6 +12,7 @@ import {
 } from "@/components/ui/table"
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
+import { useProjectContext } from "@/contexts/ProjectContext";
 
 type Resource = {
   id: string;
@@ -27,6 +28,7 @@ type Resource = {
 const ProjectResources = () => {
   const token = localStorage.getItem("token");
   const { id: projectId } = useParams<{ id: string }>();
+  const { id, name } = useProjectContext()
   const [resources, setResources] = useState<Resource[]>([]);
 
   const getProjectResources = async () => {
@@ -71,7 +73,7 @@ const ProjectResources = () => {
         <div className="flex flex-col space-y-6">
           {/* Header */}
           <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4">
-            <h1 className="text-3xl font-bold">Project: {projectId}</h1>
+            <h1 className="text-3xl font-bold">Project: {name}</h1>
           </div>
 
           <div className="flex justify-between">

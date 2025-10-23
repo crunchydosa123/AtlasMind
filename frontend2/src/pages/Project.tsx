@@ -4,13 +4,14 @@ import { ProjectCard } from "@/components/custom/ProjectCard";
 import NewProjectPopover from "@/components/custom/NewProjectPopover";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
-import { useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router-dom";
 import KnowledgeGraph from "@/components/custom/KnowlegdeGraph";
 import { useProjectContext } from "@/contexts/ProjectContext";
 
 const Project = () => {
   const { id, name, doc_url } = useProjectContext()
   const params = useParams()
+  const navigate = useNavigate();
   console.log("projectId: ", params.id);
   return (
     <SidebarProvider>
@@ -35,7 +36,7 @@ const Project = () => {
                   <CardDescription>Add documents, Excel sheets, PDFs to project memory</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button className="w-full">Add Resource</Button>
+                  <Button className="w-full" onClick={()=> navigate(`/project/${id}/resources?addResource=true`)}>Add Resource</Button>
                 </CardFooter>
               </Card>
 
@@ -45,7 +46,7 @@ const Project = () => {
                   <CardDescription>Create a new document in project memory</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button className="w-full">Write Document</Button>
+                  <Button className="w-full" onClick={()=> navigate(`/project/${id}/write-doc`)}>Write Document</Button>
                 </CardFooter>
               </Card>
 
@@ -55,7 +56,7 @@ const Project = () => {
                   <CardDescription>Update Excel sheets or CSVs in the project</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button className="w-full">Edit Spreadsheet</Button>
+                  <Button className="w-full" disabled={true}>WIP</Button>
                 </CardFooter>
               </Card>
 
@@ -65,7 +66,7 @@ const Project = () => {
                   <CardDescription>Chat with the project using AI (Large Language Models)</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button className="w-full">Chat with Project</Button>
+                  <Button className="w-full" disabled={true}>WIP</Button>
                 </CardFooter>
               </Card>
             </div>

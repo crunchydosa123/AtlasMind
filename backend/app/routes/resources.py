@@ -127,3 +127,17 @@ async def upload_resource(
 
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
+    
+@router.get('/')
+def get_all_resources(current_user: dict = Depends(get_current_user)):
+    response = (
+    supabase
+    .table("Resources")
+    .select("id, project_id, file_name, created_at, Projects(name)")
+    .eq("created_by", current_user["id"])
+    .execute()
+)
+    if response.data:
+        return response.data
+    else:
+        return []
