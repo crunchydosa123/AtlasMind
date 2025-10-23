@@ -28,7 +28,7 @@ type Resource = {
 const ProjectResources = () => {
   const token = localStorage.getItem("token");
   const { id: projectId } = useParams<{ id: string }>();
-  const { id, name } = useProjectContext()
+  const { name } = useProjectContext()
   const [resources, setResources] = useState<Resource[]>([]);
 
   const getProjectResources = async () => {
