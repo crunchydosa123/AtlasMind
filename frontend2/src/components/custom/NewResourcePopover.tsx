@@ -4,7 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useState } from "react";
-import { useParams, useSearchParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
 
 const NewResourcePopover = () => {
   const token = localStorage.getItem("token");

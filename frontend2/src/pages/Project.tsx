@@ -1,7 +1,5 @@
 import { AppSidebar } from "@/components/custom/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import { ProjectCard } from "@/components/custom/ProjectCard";
-import NewProjectPopover from "@/components/custom/NewProjectPopover";
 import { Card, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router-dom";
@@ -9,7 +7,7 @@ import KnowledgeGraph from "@/components/custom/KnowlegdeGraph";
 import { useProjectContext } from "@/contexts/ProjectContext";
 
 const Project = () => {
-  const { id, name, doc_url } = useProjectContext()
+  const { id, name } = useProjectContext()
   const params = useParams()
   const navigate = useNavigate();
   console.log("projectId: ", params.id);

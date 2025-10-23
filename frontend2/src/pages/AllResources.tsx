@@ -1,10 +1,7 @@
 import { AppSidebar } from "@/components/custom/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
-import NewProjectPopover from "@/components/custom/NewProjectPopover";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
-import { Card, CardContent } from "@/components/ui/card";
-import NewResourcePopover from "@/components/custom/NewResourcePopover";
 
 const AllResources = () => {
   const [resources, setResources] = useState<any[]>([]);

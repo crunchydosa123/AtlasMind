@@ -1,5 +1,4 @@
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card"
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar"
+import { Card, CardContent, CardDescription, CardFooter, CardTitle } from "@/components/ui/card"
 import { Button } from "@/components/ui/button"
 
 interface AvatarData {
@@ -17,7 +16,7 @@ interface ProjectCardProps {
   id: string
 }
 
-export const ProjectCard = ({ imageUrl, title, description, avatars, onClick }: ProjectCardProps) => {
+export const ProjectCard = ({ imageUrl, title, description, onClick }: ProjectCardProps) => {
   console.log(title, imageUrl)
   return (
     <Card>

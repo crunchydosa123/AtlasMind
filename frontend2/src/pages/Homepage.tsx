@@ -1,9 +1,7 @@
 import CardNav from '@/components/react-bits/CardNav';
 import DotGrid from '@/components/react-bits/DotGrid';
 
-type Props = {};
-
-const Homepage = (props: Props) => {
+const Homepage = () => {
   const items = [
     {
       label: "About",

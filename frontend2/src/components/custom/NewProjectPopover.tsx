@@ -5,9 +5,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useState } from "react";
 
-type Props = {}
-
-const NewProjectPopover = (props: Props) => {
+const NewProjectPopover = () => {
   const token = localStorage.getItem("token");
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");

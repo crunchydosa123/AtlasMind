@@ -1,5 +1,5 @@
 import { useLocation, useNavigate } from "react-router-dom";
-import { Calendar, Home, Inbox, Search } from "lucide-react";
+import { Calendar, Home, Inbox } from "lucide-react";
 import {
   Sidebar,
   SidebarContent,

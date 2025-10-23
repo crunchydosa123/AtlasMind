@@ -13,8 +13,14 @@ import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import NewResourcePopover from "@/components/custom/NewResourcePopover";
 
+type Message = {
+  role: "user" | "bot";
+  content: string;
+  pushed?: boolean; // optional
+};
+
 const ProjectDocs = () => {
-  const [messages, setMessages] = useState<{ role: string; content: string }[]>([]);
+  const [messages, setMessages] = useState<Message[]>([]);
   const [prompt, setPrompt] = useState("");
   const [pushingIndex, setPushingIndex] = useState<number | null>(null); // track which message is being pushed
 
