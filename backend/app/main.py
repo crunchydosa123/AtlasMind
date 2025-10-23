@@ -11,6 +11,8 @@ app = FastAPI(
 origins = [
     "http://localhost:5173",  # React dev server
     "http://127.0.0.1:5173",
+    "atlas-mind-xi.vercel.app",
+    "atlas-mind-e4csfrhrp-prathams-projects-cf4562a7.vercel.app"
 ]
 
 app.add_middleware(
