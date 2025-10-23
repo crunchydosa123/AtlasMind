@@ -13,14 +13,17 @@ from app.services.google_docs_service import GoogleDocsService
 load_dotenv()
 router = APIRouter()
 
+'''
 creds_path_var = os.environ.get("GOOGLE_CREDS_JSON")
 if not creds_path_var:
     raise ValueError("GOOGLE_CREDS_JSON environment variable not set")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-creds_path = os.path.join(BASE_DIR, creds_path_var)
+''' 
 
-google_docs_service = GoogleDocsService(creds_path)
+creds_json_str = os.environ.get("GOOGLE_CREDS_JSON")
+
+google_docs_service = GoogleDocsService(creds_json_str)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")

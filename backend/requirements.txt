@@ -98,7 +98,6 @@ python-multipart==0.0.20
 pytz==2025.2
 PyYAML==6.0.2
 realtime==2.19.0
-redis==6.4.0
 requests==2.32.4
 requests-oauthlib==2.0.0
 requests-toolbelt==1.0.0
