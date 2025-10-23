@@ -26,7 +26,7 @@ export function LoginForm() {
   setError("");
 
   try {
-    const res = await fetch("http://localhost:8000/auth/login", {
+    const res = await fetch("https://atlasmind.onrender.com/auth/login", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -40,7 +40,7 @@ export function LoginForm() {
     localStorage.setItem("token", data.access_token);
 
     // Fetch user info
-    const userRes = await fetch("http://localhost:8000/auth/me", {
+    const userRes = await fetch("https://atlasmind.onrender.com/auth/me", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

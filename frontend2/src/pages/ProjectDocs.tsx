@@ -25,7 +25,7 @@ const ProjectDocs = () => {
     setMessages((prev) => [...prev, { role: "user", content: prompt }]);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/chat/llm", {
+      const res = await fetch("https://atlasmind.onrender.com/chat/llm", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -60,7 +60,7 @@ const ProjectDocs = () => {
   const handlePushToGoogleDoc = async (content: string, idx: number) => {
     setPushingIndex(idx);
     try {
-      const res = await fetch("http://127.0.0.1:8000/projects/push-to-docs", {
+      const res = await fetch("https://atlasmind.onrender.com/projects/push-to-docs", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

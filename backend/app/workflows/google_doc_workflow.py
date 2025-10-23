@@ -4,17 +4,14 @@ from typing import TypedDict
 from app.agents.google_agent import GoogleAgent
 from app.services.projects_service import get_project_context
 
-'''
 creds_path_var = os.environ.get("GOOGLE_CREDS_JSON")
 if not creds_path_var:
     raise ValueError("GOOGLE_CREDS_JSON environment variable not set")
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 creds_path = os.path.join(BASE_DIR, creds_path_var)
-'''
 
-creds_json_str = os.environ.get("GOOGLE_CREDS_JSON")
-google_agent = GoogleAgent(creds_json_path=creds_json_str)
+google_agent = GoogleAgent(creds_json_path=creds_path)
 
 class WorkflowState(TypedDict):
     project_id: str

@@ -14,7 +14,7 @@ const AllResources = () => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No token found. Please login.");
 
-    const res = await fetch("http://127.0.0.1:8000/resources/", {
+    const res = await fetch("https://atlasmind.onrender.com/resources/", {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

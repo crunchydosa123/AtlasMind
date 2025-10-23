@@ -28,7 +28,7 @@ const NewResourcePopover = () => {
     formData.append("file", files[0]);
 
     try {
-      const res = await fetch("http://127.0.0.1:8000/resources/upload", {
+      const res = await fetch("https://atlasmind.onrender.com/resources/upload", {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

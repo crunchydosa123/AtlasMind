@@ -31,7 +31,7 @@ const KnowledgeGraph = (props: Props) => {
   const getProjectGraph = async () => {
     if (!props.project_id) return;
     try {
-      const res = await fetch(`http://127.0.0.1:8000/graph?project_id=${props.project_id}`);
+      const res = await fetch(`https://atlasmind.onrender.com/graph?project_id=${props.project_id}`);
       const data = await res.json();
       setGraphData(data);
     } catch (err) {

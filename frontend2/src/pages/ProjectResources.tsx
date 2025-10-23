@@ -34,7 +34,7 @@ const ProjectResources = () => {
   const getProjectResources = async () => {
     if (!projectId || !token) return [];
 
-    const res = await fetch(`http://127.0.0.1:8000/resources/project/${projectId}`, {
+    const res = await fetch(`https://atlasmind.onrender.com/resources/project/${projectId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",
