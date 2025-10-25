@@ -22,7 +22,7 @@ function App() {
           <Route path="/login" element={<Login />} />
           <Route path="/signup" element={<Signup />} />
 
-          {/* Resources */}
+          {/* All Resources */}
           <Route path="/resources" element={<AllResources />} />
 
           {/* Projects */}
