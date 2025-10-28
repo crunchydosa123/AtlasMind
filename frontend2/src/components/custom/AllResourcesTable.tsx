@@ -18,7 +18,7 @@ const AllResourcesTable = ({ resources }: { resources: Resource[] }) => {
       <table className="min-w-full border-collapse border border-gray-200">
         <thead className="bg-gray-100">
           <tr>
-            <th className="border border-gray-300 px-4 py-2 text-left">Resource ID</th>
+            <th className="border border-gray-200 px-4 py-2 text-left">Resource ID</th>
             <th className="border border-gray-300 px-4 py-2 text-left">Project Name</th>
             <th className="border border-gray-300 px-4 py-2 text-left">Project ID</th>
           </tr>
