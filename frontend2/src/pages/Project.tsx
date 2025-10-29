@@ -64,7 +64,7 @@ const Project = () => {
                   <CardDescription>Chat with the project using AI (Large Language Models)</CardDescription>
                 </CardHeader>
                 <CardFooter>
-                  <Button className="w-full" disabled={true}>WIP</Button>
+                  <Button className="w-full" disabled={true}>Work in Process</Button>
                 </CardFooter>
               </Card>
             </div>
