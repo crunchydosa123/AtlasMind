@@ -77,7 +77,7 @@ const Project = () => {
             <Card className="h-64">
               <CardHeader>
                 <CardTitle>Recent Activity</CardTitle>
-                <CardDescription>Track recent changes, uploads, and actions in this project</CardDescription>
+                <CardDescription>Track recent changes, uploads, and actions for this project</CardDescription>
               </CardHeader>
             </Card>
           </section>
