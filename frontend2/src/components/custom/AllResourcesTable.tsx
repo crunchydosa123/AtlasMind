@@ -1,4 +1,5 @@
 import { Card } from "@/components/ui/card";
+import { KnowledgeGraph } from "KnowledgeGraph";
 
 interface Resource {
   id: string;
