@@ -65,7 +65,7 @@ const Homepage = () => {
         className='flex flex-col'
       >
 
-        <div className='rounded-full bg-white/30 backdrop-blur-md border border-gray-500 p-2 text-lg'>Welcome to MindGrid1</div>
+        <div className='rounded-full bg-white/30 backdrop-blur-md border border-gray-500 p-2 text-lg'>Welcome to MindGrid</div>
         <div className=' rounded-full  border-gray-500 p-2 text-7xl mt-5 font-semibold'>A Repository for your thoughts</div>
       </div>
     </div>
