@@ -2,6 +2,7 @@ import requests
 import json
 from .redis_service import get_conversation, save_message
 
+#NO LONGER USED IN PROJECT AS WE SWAPPED IT FOR API CALL, THIS IS GOOD TO HAVE IF YOU WANT TO USE OLLAMA
 def call_phi3mini(session_id: str, prompt: str, max_tokens: int = 300):
     # retrieve past conversation
     history = get_conversation(session_id)
