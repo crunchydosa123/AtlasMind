@@ -5,12 +5,15 @@ import os, jwt
 from dotenv import load_dotenv
 from datetime import datetime, timedelta
 from passlib.hash import sha256_crypt
+from google.oauth2 import id_token
+from google.auth.transport import requests
 
 load_dotenv()
 router = APIRouter()
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 SECRET_KEY = os.environ.get("JWT_SECRET")
@@ -89,3 +92,32 @@ def get_me(request: Request):
         raise HTTPException(status_code=404, detail="User not found")
 
     return {"user": res.data}
+
+@router.post("/oauth/callback")
+def google_oauth_login(cred: GoogleCredential):
+    try:
+        idinfo = id_token.verify_oauth2_token(
+            cred.credential,
+            requests.Request(),
+            GOOGLE_CLIENT_ID
+        )
+        google_user_id = idinfo["sub"]
+        email = idinfo["email"]
+        full_name = idinfo.get("name", "")
+    except ValueError:
+        raise HTTPException(status_code=401, detail="Invalid Google token")
+
+    user_res = supabase.table("Users").select("*").eq("google_id", google_user_id).single().execute()
+    user_data = user_res.data
+
+    if not user_data:
+        insert_res = supabase.table("Users").insert({
+            "email": email,
+            "full_name": full_name,
+            "google_id": google_user_id
+        }).execute()
+        user_data = insert_res.data[0]
+
+    token = create_access_token({"user_id": user_data["id"], "email": email})
+
+    return {"access_token": token, "token_type": "bearer", "user": user_data}

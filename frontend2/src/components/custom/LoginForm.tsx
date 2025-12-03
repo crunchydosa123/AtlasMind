@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useUser } from "@/contexts/UserContext"
 import { useNavigate } from "react-router-dom"
+import { GoogleLogin, useGoogleLogin } from "@react-oauth/google"
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export function LoginForm() {
@@ -21,63 +22,108 @@ export function LoginForm() {
   const { user, setUser } = useUser();
   const navigate = useNavigate();
 
-  const handleSubmit = async (e: React.FormEvent) => {
-  e.preventDefault();
-  setLoading(true);
-  setError("");
+  const googleLogin = useGoogleLogin({
+  flow: "implicit",
+  scope: [
+    "openid",
+    "email",
+    "profile",
+    "https://www.googleapis.com/auth/documents",
+    "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/calendar"
+  ].join(" "),
+  onSuccess: async (tokenResponse:any) => {
+    console.log("Google OAuth token:", tokenResponse);
 
-  try {
-    const res = await fetch(`${BACKEND_URL}/auth/login`, {
+    // Send the access token to your backend
+    const res = await fetch(`${BACKEND_URL}/auth/google`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify(tokenResponse)
     });
 
     const data = await res.json();
 
-    if (!res.ok) throw new Error(data.message || "Login failed");
+    if (data.access_token) {
+      localStorage.setItem("token", data.access_token);
 
-    // Store token
-    localStorage.setItem("token", data.access_token);
+      // Fetch user data
+      const userRes = await fetch(`${BACKEND_URL}/auth/me`, {
+        headers: { Authorization: `Bearer ${data.access_token}` }
+      });
+      const userData = await userRes.json();
 
-    // Fetch user info
-    const userRes = await fetch(`${BACKEND_URL}/auth/me`, {
-      method: "GET",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${data.access_token}`,
-      },
-    });
+      setUser({
+        id: userData.user.id,
+        email: userData.user.email,
+        name: userData.user.full_name
+      });
 
-    const userData = await userRes.json();
-    const selfData = userData.user
-    console.log(selfData)
-    setUser({
-      id: selfData.id,
-      email: selfData.email,
-      name: selfData.full_name
-    });
+      navigate("/projects");
+    }
+  },
+  onError: () => console.log("Google login failed")
+});
 
-    console.log(user)
 
-    alert("Login successful!");
-    navigate('/projects')
-  } catch (err: any) {
-    setError(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const res = await fetch(`${BACKEND_URL}/auth/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "Login failed");
+
+      // Store token
+      localStorage.setItem("token", data.access_token);
+
+      // Fetch user info
+      const userRes = await fetch(`${BACKEND_URL}/auth/me`, {
+        method: "GET",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${data.access_token}`,
+        },
+      });
+
+      const userData = await userRes.json();
+      const selfData = userData.user
+      console.log(selfData)
+      setUser({
+        id: selfData.id,
+        email: selfData.email,
+        name: selfData.full_name
+      });
+
+      console.log(user)
+
+      alert("Login successful!");
+      navigate('/projects')
+    } catch (err: any) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  };
 
 
   return (
     <Card className="w-full max-w-sm">
       <CardHeader>
         <div className="p-4 w-full flex justify-center items-center">
-          <img src="/assets/logo.png" className="w-10 h-10"/>
+          <img src="/assets/logo.png" className="w-10 h-10" />
           <div className="text-2xl font-semibold">MindGrid</div>
         </div>
-        
+
         <CardTitle>Login to your account</CardTitle>
         <CardDescription>
           Enter your email below to login to your account
@@ -99,7 +145,7 @@ export function LoginForm() {
           <div className="grid gap-2">
             <div className="flex items-center">
               <Label htmlFor="password">Password</Label>
-              
+
             </div>
             <Input
               id="password"
@@ -114,7 +160,14 @@ export function LoginForm() {
             {loading ? "Logging in..." : "Login"}
           </Button>
         </form>
-        <Button variant={'outline'} className="w-full my-2" onClick={()=> navigate('/signup')}>New Here? Signup</Button>
+
+        <Button 
+  variant="outline" 
+  className="w-full mt-4" 
+  onClick={() => googleLogin()}>
+    Continue with Google
+</Button>
+        <Button variant={'outline'} className="w-full my-2" onClick={() => navigate('/signup')}>New Here? Signup</Button>
       </CardContent>
     </Card>
   )

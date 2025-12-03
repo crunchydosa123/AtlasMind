@@ -10,9 +10,11 @@ import { ProjectProvider } from "./contexts/ProjectContext";
 import { UserProvider } from "./contexts/UserContext";
 import Homepage from "./pages/Homepage";
 import Agents from "./pages/Agents";
+import { GoogleOAuthProvider } from "@react-oauth/google";
 
 function App() {
   return (
+    <GoogleOAuthProvider clientId={import.meta.env.VITE_GOOGLE_OAUTH_CLIENT_ID}>
     <UserProvider>
     <ProjectProvider>
       <Router>
@@ -42,6 +44,7 @@ function App() {
       </Router>
     </ProjectProvider>
     </UserProvider>
+    </GoogleOAuthProvider>
   );
 }
 
