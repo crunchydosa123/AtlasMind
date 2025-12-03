@@ -2,6 +2,7 @@ import { AppSidebar } from "@/components/custom/Sidebar";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { useEffect, useState } from "react";
 import { Input } from "@/components/ui/input";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const AllResources = () => {
   const [resources, setResources] = useState<any[]>([]);
@@ -11,7 +12,7 @@ const AllResources = () => {
     const token = localStorage.getItem("token");
     if (!token) throw new Error("No token found. Please login.");
 
-    const res = await fetch("https://atlasmind.onrender.com/resources/", {
+    const res = await fetch(`${BACKEND_URL}/resources/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useState } from "react";
 import NewResourcePopover from "@/components/custom/NewResourcePopover";
+const BACKEND_URL = import.meta.env.VITE_API_URL;
 
 type Message = {
   role: "user" | "bot";
@@ -31,7 +32,7 @@ const ProjectDocs = () => {
     setMessages((prev) => [...prev, { role: "user", content: prompt }]);
 
     try {
-      const res = await fetch("https://atlasmind.onrender.com/chat/llm", {
+      const res = await fetch(`${BACKEND_URL}/chat/llm`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -66,7 +67,7 @@ const ProjectDocs = () => {
   const handlePushToGoogleDoc = async (content: string, idx: number) => {
     setPushingIndex(idx);
     try {
-      const res = await fetch("https://atlasmind.onrender.com/projects/push-to-docs", {
+      const res = await fetch(`${BACKEND_URL}/projects/push-to-docs`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

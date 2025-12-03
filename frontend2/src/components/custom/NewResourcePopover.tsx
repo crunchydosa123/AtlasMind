@@ -5,6 +5,7 @@ import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useState } from "react";
 import { useParams } from "react-router-dom";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const NewResourcePopover = () => {
   const token = localStorage.getItem("token");
@@ -28,7 +29,7 @@ const NewResourcePopover = () => {
     formData.append("file", files[0]);
 
     try {
-      const res = await fetch("https://atlasmind.onrender.com/resources/upload", {
+      const res = await fetch(`${BACKEND_URL}/resources/upload`, {
         method: "POST",
         headers: {
           "Authorization": `Bearer ${token}`,

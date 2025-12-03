@@ -5,6 +5,7 @@ import NewProjectPopover from "@/components/custom/NewProjectPopover";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProjectContext } from "@/contexts/ProjectContext";
+const BACKEND_URL = import.meta.env.VITE_API_URL;
 
 type Project = {
   id: string;
@@ -37,7 +38,7 @@ const Dashboard = () => {
       throw new Error("No token found. Please login.");
     }
 
-    const res = await fetch("https://atlasmind.onrender.com/projects/", {
+    const res = await fetch(`${BACKEND_URL}/projects/`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

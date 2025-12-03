@@ -13,6 +13,7 @@ import {
 import { useParams } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { useProjectContext } from "@/contexts/ProjectContext";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type Resource = {
   id: string;
@@ -35,7 +36,7 @@ const ProjectResources = () => {
   const getProjectResources = async () => {
     if (!projectId || !token) return [];
 
-    const res = await fetch(`https://atlasmind.onrender.com/resources/project/${projectId}`, {
+    const res = await fetch(`${BACKEND_URL}/resources/project/${projectId}`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

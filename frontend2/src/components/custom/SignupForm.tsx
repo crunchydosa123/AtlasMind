@@ -12,6 +12,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useNavigate } from "react-router-dom"
 import { useState } from "react"
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export function SignupForm() {
   const navigate = useNavigate();
@@ -31,7 +32,7 @@ export function SignupForm() {
 
     setLoading(true);
     try {
-      const res = await fetch("https://atlasmind.onrender.com/auth/signup", {
+      const res = await fetch(`${BACKEND_URL}/auth/signup`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

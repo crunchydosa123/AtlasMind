@@ -11,6 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useUser } from "@/contexts/UserContext"
 import { useNavigate } from "react-router-dom"
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export function LoginForm() {
   const [email, setEmail] = useState("")
@@ -26,7 +27,7 @@ export function LoginForm() {
   setError("");
 
   try {
-    const res = await fetch("https://atlasmind.onrender.com/auth/login", {
+    const res = await fetch(`${BACKEND_URL}/auth/login`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({ email, password }),
@@ -40,7 +41,7 @@ export function LoginForm() {
     localStorage.setItem("token", data.access_token);
 
     // Fetch user info
-    const userRes = await fetch("https://atlasmind.onrender.com/auth/me", {
+    const userRes = await fetch(`${BACKEND_URL}/auth/me`, {
       method: "GET",
       headers: {
         "Content-Type": "application/json",

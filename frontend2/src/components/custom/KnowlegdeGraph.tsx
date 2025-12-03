@@ -1,6 +1,7 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { useEffect, useState } from "react";
 import ForceGraph2D from "react-force-graph-2d";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type GraphNode = {
   id: number | string;
@@ -31,7 +32,7 @@ const KnowledgeGraph = (props: Props) => {
   const getProjectGraph = async () => {
     if (!props.project_id) return;
     try {
-      const res = await fetch(`https://atlasmind.onrender.com/graph?project_id=${props.project_id}`);
+      const res = await fetch(`${BACKEND_URL}/graph?project_id=${props.project_id}`);
       const data = await res.json();
       setGraphData(data);
     } catch (err) {

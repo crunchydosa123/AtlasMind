@@ -4,6 +4,7 @@ import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle }
 import { Label } from "../ui/label";
 import { Input } from "../ui/input";
 import { useState } from "react";
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 const NewProjectPopover = () => {
   const token = localStorage.getItem("token");
@@ -20,7 +21,7 @@ const NewProjectPopover = () => {
     setLoading(true);
 
     try {
-      const res = await fetch("https://atlasmind.onrender.com/projects/", {
+      const res = await fetch(`${BACKEND_URL}/projects/`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
