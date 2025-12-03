@@ -11,7 +11,7 @@ import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { useUser } from "@/contexts/UserContext"
 import { useNavigate } from "react-router-dom"
-import { GoogleLogin, useGoogleLogin } from "@react-oauth/google"
+import { useGoogleLogin } from "@react-oauth/google"
 const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 export function LoginForm() {
