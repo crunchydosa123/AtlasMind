@@ -29,6 +29,9 @@ class UserLogin(BaseModel):
     email: str
     password: str
 
+class GoogleCredential(BaseModel):
+    credential: str
+
 def create_access_token(data: dict, expires_delta: timedelta = None):
     """Generate JWT token"""
     to_encode = data.copy()
