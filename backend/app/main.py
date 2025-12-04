@@ -1,6 +1,6 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from app.routes import agents, tools, projects, resources, auth, graph, chat
+from app.routes import agents, tools, projects, resources, auth, graph, chat, google_services
 
 app = FastAPI(
     title="Agent Benchmark API",
@@ -30,6 +30,7 @@ app.include_router(projects.router, prefix="/projects", tags=["Projects"])
 app.include_router(resources.router, prefix="/resources", tags=["Resources"])
 app.include_router(auth.router, prefix="/auth", tags=["Auth"])
 app.include_router(graph.router, prefix="/graph", tags=["Graph"])
+app.include_router(google_services.router, prefix="/google-services", tags=["Google_Services"])
 app.include_router(chat.router, prefix="/chat", tags=["Chat"])
 
 @app.get("/")

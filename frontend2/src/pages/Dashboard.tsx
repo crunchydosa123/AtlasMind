@@ -5,7 +5,7 @@ import NewProjectPopover from "@/components/custom/NewProjectPopover";
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useProjectContext } from "@/contexts/ProjectContext";
-const BACKEND_URL = import.meta.env.VITE_API_URL;
+const BACKEND_URL = import.meta.env.VITE_BACKEND_URL;
 
 type Project = {
   id: string;
@@ -16,9 +16,17 @@ type Project = {
   avatars?: string[];
 };
 
+type Document = {
+  id: string;
+  name: string;
+  modified_time: string;
+  owners: string;
+};
+
 const Dashboard = () => {
   const navigate = useNavigate();
   const [projects, setProjects] = useState<Project[]>([]);
+  const [docs, setDocs] = useState<Document[]>([]);
   const { setProject } = useProjectContext();
 
   const selectProjectAndRedirect = (project: Project) => {
@@ -45,9 +53,32 @@ const Dashboard = () => {
         Authorization: `Bearer ${token}`,
       },
     });
+    console.log(res)
 
     if (!res.ok) {
       throw new Error("Failed to fetch projects");
+    }
+
+    const data = await res.json();
+    return data;
+  };
+
+  const getDocs = async () => {
+    const token = localStorage.getItem("token");
+    if (!token) {
+      throw new Error("No token found. Please login.");
+    }
+
+    const res = await fetch(`${BACKEND_URL}/google-services/docs`, {
+      method: "GET",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+    });
+
+    if (!res.ok) {
+      throw new Error("Failed to fetch projects: ");
     }
 
     const data = await res.json();
@@ -64,7 +95,23 @@ const Dashboard = () => {
       }
     };
 
+    const fetchDocs = async () => {
+      try {
+        const data = await getDocs();
+        const formattedDocs: Document[] = data.documents.files.map((doc: any) => ({
+          id: doc.id,
+          name: doc.name,
+          modified_time: doc.modifiedTime,
+          owners: doc.owners.map((o: any) => o.displayName).join(", "),
+        }));
+        setDocs(formattedDocs);
+      } catch (err: any) {
+        console.error("Error fetching docs:", err);
+      }
+    };
+
     fetchProjects();
+    fetchDocs();
   }, []);
 
   return (

@@ -29,12 +29,13 @@ export function LoginForm() {
       "email",
       "profile",
       "https://www.googleapis.com/auth/documents",
-      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/drive",
       "https://www.googleapis.com/auth/spreadsheets",
       "https://www.googleapis.com/auth/calendar"
     ].join(" "),
+    // @ts-ignore
+    prompt: "consent", // ignore TS error
     onSuccess: async (tokenResponse: any) => {
-      console.log("Google OAuth token:", tokenResponse.code);
 
       const res = await fetch(`${BACKEND_URL}/auth/oauth/google`, {
         method: "POST",
@@ -63,7 +64,7 @@ export function LoginForm() {
       }
     },
     onError: () => console.log("Google login failed")
-  });
+  } as any);
 
 
   const handleSubmit = async (e: React.FormEvent) => {

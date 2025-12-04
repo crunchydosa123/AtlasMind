@@ -118,19 +118,23 @@ def google_oauth_login(payload: dict):
             "client_secret": GOOGLE_CLIENT_SECRET,
             "redirect_uri": "postmessage",
             "grant_type": "authorization_code",
+            "access_type": "offline",
+            "prompt": "consent"
         }
     ).json()
     #print(GOOGLE_CLIENT_ID) #prints None
     #print(token_res)
     id_token_str = token_res["id_token"]
+    google_access_token = token_res["access_token"]
+    refresh_token = token_res.get("refresh_token")
 
     idinfo = id_token.verify_oauth2_token(id_token_str, requests.Request(), GOOGLE_CLIENT_ID)
     google_user_id = idinfo["sub"]
     email = idinfo["email"]
     full_name = idinfo.get("name", "")
-    print(google_user_id)
-    print(email)
-    print(full_name)
+    #print(google_user_id)
+    #print(email)
+    #print(full_name)
     try:
 
         user_res = (
@@ -141,10 +145,17 @@ def google_oauth_login(payload: dict):
             .maybe_single()
             .execute()
         )
-        print(user_res)
-        print("user_data:", user_res)
+        #print(user_res)
+        #print("user_data:", user_res)
         if user_res:
+            supabase.table("Users").update({
+                "access_token": google_access_token
+            }).eq("email", email).execute()
             user_data = user_res.data
+            if refresh_token:
+                supabase.table("Users").update({
+                    "refresh_token": refresh_token
+                }).eq("email", email).execute()
         if not user_res:
             insert_res = (
                 supabase
@@ -152,12 +163,14 @@ def google_oauth_login(payload: dict):
                 .insert({
                     "email": email,
                     "full_name": full_name,
-                    "google_id": google_user_id
+                    "google_id": google_user_id,
+                    "access_token": google_access_token,
+                    "refresh_token": refresh_token
                 })
                 .execute()
             )
             user_data = insert_res.data[0]
-            print("insert_res:", insert_res)
+            #print("insert_res:", insert_res)
         token = create_access_token({"user_id": user_data["id"], "email": email})
 
         return {"access_token": token, "token_type": "bearer", "user": user_data}
@@ -165,9 +178,3 @@ def google_oauth_login(payload: dict):
     except Exception as e:
         print(e)
         raise HTTPException(status_code=400, detail=e) 
-
-
-        
-
-    
-
