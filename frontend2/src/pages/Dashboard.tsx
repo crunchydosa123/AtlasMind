@@ -137,6 +137,22 @@ const Dashboard = () => {
             />
           ))}
         </div>
+
+        <div className="mt-12">
+          <h2 className="text-2xl font-bold mb-4">Google Docs</h2>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            {docs.map((doc) => (
+              <div
+                key={doc.id}
+                className="bg-white rounded-lg shadow p-4 cursor-pointer hover:shadow-md transition"
+              >
+                <h3 className="text-lg font-semibold">{doc.name}</h3>
+                <p className="text-sm text-gray-500">Modified: {new Date(doc.modified_time).toLocaleString()}</p>
+                <p className="text-sm text-gray-500">Owners: {doc.owners}</p>
+              </div>
+            ))}
+          </div>
+        </div>
       </main>
     </SidebarProvider>
   );
