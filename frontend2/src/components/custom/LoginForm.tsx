@@ -23,54 +23,58 @@ export function LoginForm() {
   const navigate = useNavigate();
 
   const googleLogin = useGoogleLogin({
-  flow: "implicit",
-  scope: [
-    "openid",
-    "email",
-    "profile",
-    "https://www.googleapis.com/auth/documents",
-    "https://www.googleapis.com/auth/drive.file",
-    "https://www.googleapis.com/auth/spreadsheets",
-    "https://www.googleapis.com/auth/calendar"
-  ].join(" "),
-  onSuccess: async (tokenResponse:any) => {
-    console.log("Google OAuth token:", tokenResponse);
+    flow: "auth-code",
+    scope: [
+      "openid",
+      "email",
+      "profile",
+      "https://www.googleapis.com/auth/documents",
+      "https://www.googleapis.com/auth/drive.file",
+      "https://www.googleapis.com/auth/spreadsheets",
+      "https://www.googleapis.com/auth/calendar"
+    ].join(" "),
+    onSuccess: async (tokenResponse: any) => {
+      console.log("Google OAuth token:", tokenResponse.code);
 
-    // Send the access token to your backend
-    const res = await fetch(`${BACKEND_URL}/auth/google`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(tokenResponse)
-    });
-
-    const data = await res.json();
-
-    if (data.access_token) {
-      localStorage.setItem("token", data.access_token);
-
-      // Fetch user data
-      const userRes = await fetch(`${BACKEND_URL}/auth/me`, {
-        headers: { Authorization: `Bearer ${data.access_token}` }
-      });
-      const userData = await userRes.json();
-
-      setUser({
-        id: userData.user.id,
-        email: userData.user.email,
-        name: userData.user.full_name
+      const res = await fetch(`${BACKEND_URL}/auth/oauth/google`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ code: tokenResponse.code })
       });
 
-      navigate("/projects");
-    }
-  },
-  onError: () => console.log("Google login failed")
-});
+      const data = await res.json();
+
+      if (data.access_token) {
+        localStorage.setItem("token", data.access_token);
+
+        // Fetch user data
+        const userRes = await fetch(`${BACKEND_URL}/auth/me`, {
+          headers: { Authorization: `Bearer ${data.access_token}` }
+        });
+        const userData = await userRes.json();
+
+        setUser({
+          id: userData.user.id,
+          email: userData.user.email,
+          name: userData.user.full_name
+        });
+
+        navigate("/projects");
+      }
+    },
+    onError: () => console.log("Google login failed")
+  });
 
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setError("");
+    if (password === "") {
+      setError("Password is required");
+      setLoading(false);
+      return;
+    }
 
     try {
       const res = await fetch(`${BACKEND_URL}/auth/login`, {
@@ -161,12 +165,12 @@ export function LoginForm() {
           </Button>
         </form>
 
-        <Button 
-  variant="outline" 
-  className="w-full mt-4" 
-  onClick={() => googleLogin()}>
-    Continue with Google
-</Button>
+        <Button
+          variant="outline"
+          className="w-full mt-4"
+          onClick={() => googleLogin()}>
+          Continue with Google
+        </Button>
         <Button variant={'outline'} className="w-full my-2" onClick={() => navigate('/signup')}>New Here? Signup</Button>
       </CardContent>
     </Card>

@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Request
-from pydantic import BaseModel
+from pydantic import BaseModel, field_validator
 from supabase import create_client
 import os, jwt
 from dotenv import load_dotenv
@@ -7,6 +7,7 @@ from datetime import datetime, timedelta
 from passlib.hash import sha256_crypt
 from google.oauth2 import id_token
 from google.auth.transport import requests
+import requests as http
 
 load_dotenv()
 router = APIRouter()
@@ -14,6 +15,7 @@ router = APIRouter()
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+GOOGLE_CLIENT_SECRET=os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 
 SECRET_KEY = os.environ.get("JWT_SECRET")
@@ -24,6 +26,14 @@ class UserCreate(BaseModel):
     email: str
     password: str
     full_name: str
+
+    @field_validator("password")
+    def validate_password(cls, v):
+        if not v or v.strip() == "":
+            raise ValueError("Password is required")
+        if len(v) < 6:
+            raise ValueError("Password must be at least 6 characters")
+        return v
 
 class UserLogin(BaseModel):
     email: str
@@ -96,31 +106,68 @@ def get_me(request: Request):
 
     return {"user": res.data}
 
-@router.post("/oauth/callback")
-def google_oauth_login(cred: GoogleCredential):
+@router.post("/oauth/google")
+def google_oauth_login(payload: dict):
+    code = payload["code"]
+
+    token_res = http.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "code": code,
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "redirect_uri": "postmessage",
+            "grant_type": "authorization_code",
+        }
+    ).json()
+    #print(GOOGLE_CLIENT_ID) #prints None
+    #print(token_res)
+    id_token_str = token_res["id_token"]
+
+    idinfo = id_token.verify_oauth2_token(id_token_str, requests.Request(), GOOGLE_CLIENT_ID)
+    google_user_id = idinfo["sub"]
+    email = idinfo["email"]
+    full_name = idinfo.get("name", "")
+    print(google_user_id)
+    print(email)
+    print(full_name)
     try:
-        idinfo = id_token.verify_oauth2_token(
-            cred.credential,
-            requests.Request(),
-            GOOGLE_CLIENT_ID
+
+        user_res = (
+        supabase
+            .table("Users")
+            .select("*")
+            .eq("email", email)
+            .maybe_single()
+            .execute()
         )
-        google_user_id = idinfo["sub"]
-        email = idinfo["email"]
-        full_name = idinfo.get("name", "")
-    except ValueError:
-        raise HTTPException(status_code=401, detail="Invalid Google token")
+        print(user_res)
+        print("user_data:", user_res)
+        if user_res:
+            user_data = user_res.data
+        if not user_res:
+            insert_res = (
+                supabase
+                .table("Users")
+                .insert({
+                    "email": email,
+                    "full_name": full_name,
+                    "google_id": google_user_id
+                })
+                .execute()
+            )
+            user_data = insert_res.data[0]
+            print("insert_res:", insert_res)
+        token = create_access_token({"user_id": user_data["id"], "email": email})
 
-    user_res = supabase.table("Users").select("*").eq("google_id", google_user_id).single().execute()
-    user_data = user_res.data
+        return {"access_token": token, "token_type": "bearer", "user": user_data}
+            
+    except Exception as e:
+        print(e)
+        raise HTTPException(status_code=400, detail=e) 
 
-    if not user_data:
-        insert_res = supabase.table("Users").insert({
-            "email": email,
-            "full_name": full_name,
-            "google_id": google_user_id
-        }).execute()
-        user_data = insert_res.data[0]
 
-    token = create_access_token({"user_id": user_data["id"], "email": email})
+        
 
-    return {"access_token": token, "token_type": "bearer", "user": user_data}
+    
+
