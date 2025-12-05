@@ -70,6 +70,7 @@ const Agents = () => {
         headers: { "Content-Type": "application/json", Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
+      console.log(data)
       setWorkflows(data);
     } catch (err) {
       console.error("Error fetching workflows:", err);
@@ -86,7 +87,6 @@ const Agents = () => {
     const outputId = wf.output;
     const llm = wf.llm;
     const action = wf.action;
-    const workflowNodeId = `wf-${wf.workflow_id}`;
     const actionId = `ac-${wf.workflow_id}`;
 
     nodes.push({
@@ -146,6 +146,7 @@ const Agents = () => {
         body: JSON.stringify(body),
       });
       const data = await res.json();
+      console.log(data);
       fetchWorkflows();
     } catch (err) {
       console.error(err);
@@ -225,7 +226,7 @@ const Agents = () => {
                 <SelectTrigger className="w-full mt-1 mb-4"><SelectValue placeholder="Choose workflow" /></SelectTrigger>
                 <SelectContent>
                   {workflows.map((w) => (
-                    <SelectItem key={w.workflow_id} value={`wf-${w.workflow_id}`}>
+                    <SelectItem key={w.workflow_id} value={`${w.workflow_id}`}>
                       {w.action.toUpperCase()} ({w.input} → {w.output})
                     </SelectItem>
                   ))}

@@ -159,15 +159,15 @@ async def list_workflows(current_user: dict = Depends(get_current_user)):
             .order("created_at", desc=True)
             .execute()
         )
-
+        
         if workflows_res.data is None:
             return []
 
         workflows = workflows_res.data
-
+        print(workflows)
         return [
             WorkflowItem(
-                workflow_id=str(w["id"]),
+                workflow_id=str(w["new_id"]),
                 input=w["input_resource_id"],
                 llm=w["prompt"],
                 output=w["output_resource_id"],
@@ -203,7 +203,7 @@ async def run_workflow(
         workflow_res = (
             supabase.table("Workflows")
             .select("*")
-            .eq("id", workflow_id)
+            .eq("new_id", workflow_id)
             .eq("created_by", user["id"])
             .single()
             .execute()
@@ -212,6 +212,7 @@ async def run_workflow(
         if not workflow:
             raise HTTPException(status_code=404, detail="Workflow not found")
 
+        print(workflow)
         input_res_id = workflow["input_resource_id"]
         output_res_id = workflow["output_resource_id"]
         action = workflow.get("action")
@@ -221,6 +222,7 @@ async def run_workflow(
         input_res = supabase.table("Resources").select("*").eq("id", input_res_id).maybe_single().execute()
         output_res = supabase.table("Resources").select("*").eq("id", output_res_id).maybe_single().execute()
 
+        print(input_res)
         if not input_res.data or not output_res.data:
             raise HTTPException(status_code=404, detail="Resource not found")
 
@@ -261,8 +263,10 @@ async def run_workflow(
             contents=f"{prompt}\n\n{input_text}"  # combine prompt + input text
         )
 
+        llm_response_parsed = llm_response.candidates[0].content.parts[0].text
+
         # 6. Update output document
-        requests_body = [{"insertText": {"location": {"index": 1}, "text": llm_response}}]
+        requests_body = [{"insertText": {"location": {"index": 1}, "text": llm_response_parsed}}]
         batch_resp = requests.post(
             f"https://docs.googleapis.com/v1/documents/{output_doc_id}:batchUpdate",
             headers={**headers, "Content-Type": "application/json"},
@@ -277,7 +281,7 @@ async def run_workflow(
             llm=prompt,
             output=output_res_id,
             action=action,
-            result=llm_response
+            result=llm_response_parsed
         )
 
     except Exception as e:
