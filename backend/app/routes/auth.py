@@ -146,7 +146,7 @@ def google_oauth_login(payload: dict):
             .execute()
         )
         #print(user_res)
-        #print("user_data:", user_res)
+        print("user_data:", user_res)
         if user_res:
             supabase.table("Users").update({
                 "access_token": google_access_token

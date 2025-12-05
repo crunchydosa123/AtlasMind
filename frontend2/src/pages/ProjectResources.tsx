@@ -100,6 +100,8 @@ const ProjectResources = () => {
 
     if (!res.ok) throw new Error("Failed to fetch docs.");
 
+    //const data = await res.json();
+    //console.log(data);
     return res.json();
   };
 

@@ -121,7 +121,7 @@ async def refresh_google_token(refresh_token: str):
 
 
 async def fetch_doc_text(doc_id: str, access_token: str) -> str:
-    url = f"https://www.googleapis.com/drive/v3/files/{doc_id}/export?mimeType=text/html"
+    url = f"https://www.googleapis.com/drive/v3/files/{doc_id}/export?mimeType=text/plain"
     
     async with httpx.AsyncClient() as client:
         response = await client.get(url, headers={"Authorization": f"Bearer {access_token}"})
@@ -185,7 +185,8 @@ async def import_docs(
                 "parsed_text": text,
                 "created_by": user["id"],
                 "project_id": project_id,
-                "file_type": "google doc"
+                "file_type": "google doc",
+                "doc_id": doc.id,
             }).execute()
 
             concepts = extract_concepts(text)

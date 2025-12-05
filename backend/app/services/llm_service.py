@@ -20,51 +20,84 @@ def clean_llm_response(llm_response: str):
 
 
 
-async def query_neo4j_with_llm(user_query: str):
-  prompt = f"""
+async def query_neo4j_with_llm(user_query: str, project_id: str, selected_resources: list[str]):
+    """
+    Generate a Cypher query using LLM while enforcing:
+    - Project scoping
+    - Resource scoping (selected resource IDs)
+    """
+
+    # Format resource_id list into Cypher list syntax
+    resource_list_cypher = "[" + ",".join([f"'{rid}'" for rid in selected_resources]) + "]"
+
+    prompt = f"""
     You are an expert in Neo4j and Cypher.
 
-    The database has nodes:
-    - Project
-    - Resource
-    - Concept
-
-    Relationships:
+    Database structure:
     - (Project)-[:HAS_RESOURCE]->(Resource)
     - (Resource)-[:COVERS]->(Concept)
 
-    Your task:
-    Given a natural language query, generate a Cypher query that returns all matching Resource nodes.
-    - Use the alias `r` for Resource nodes and `c` for Concept nodes.
-    - Include the related Concept nodes if they are relevant.
-    - If the query mentions a Project, filter resources for that Project.
-    - If the query mentions a Concept, filter resources linked to that Concept using case-insensitive partial matching with CONTAINS.
-    - If the query is general, return all Resource nodes.
+    Query rules:
+    - Always scope to Project id = "{project_id}".
+    - Always restrict Resource to Names in this list:
+      {resource_list_cypher}
 
-    Write **only the Cypher query**, using these aliases (`r` for Resource, `c` for Concept). Do not include explanations, comments, or markdown.
-    Here is the user query:
+    - Use alias r for Resource, c for Concept.
+    - If the user mentions a Concept → filter using:
+      toLower(c.name) CONTAINS toLower(<concept>)
+
+    - If the user asks "what is this resource about", "explain <name>", or includes a resource name → 
+      filter using:
+      toLower(r.name) CONTAINS toLower(<name>)
+
+    - If query is general → return all selected resources and their concepts.
+
+    Return ONLY the Cypher query, no explanation, no markdown.
+
+    User query:
     "{user_query}"
-  """
+    """
 
+    llm_response = client.models.generate_content(
+        model="gemini-2.5-flash",
+        contents=prompt
+    )
 
-  
-  llm_response = client.models.generate_content(
-    model="gemini-2.5-flash",
-    contents=prompt
-  )
+    # Extract LLM text safely
+    cypher_text = (
+        llm_response.candidates[0].content.parts[0].text.strip()
+        if llm_response.candidates
+        else ""
+    )
+    cypher_text = cypher_text.replace("```", "").replace("cypher", "").strip()
 
-  cypher_text = ""
-  if (
-        llm_response.candidates
-        and llm_response.candidates[0].content
-        and llm_response.candidates[0].content.parts
-    ):
-        cypher_text = llm_response.candidates[0].content.parts[0].text.strip()
+    # Force project + resource scoping if missing
+    if "MATCH" not in cypher_text:
+        # LLM failed → fallback generic query
+        cypher_text = """
+        MATCH (p:Project {id: '%s'})-[:HAS_RESOURCE]->(r:Resource)
+        WHERE r.name IN %s
+        OPTIONAL MATCH (r)-[:COVERS]->(c:Concept)
+        RETURN r, c
+        """ % (project_id, resource_list_cypher)
+        return cypher_text.strip()
 
-        # Remove markdown formatting if any
-        cypher_text = cypher_text.replace("```cypher", "").replace("```", "").strip()
+    # Ensure scoping exists
+    if "Project" not in cypher_text:
+        cypher_text = f"""
+        MATCH (p:Project {{id: '{project_id}'}})-[:HAS_RESOURCE]->(r:Resource)
+        WHERE r.name IN {resource_list_cypher}
+        {cypher_text}
+        """.strip()
 
-  return cypher_text
+    # Ensure resource restriction exists
+    if "r.name IN" not in cypher_text:
+        cypher_text = cypher_text.replace(
+            "WHERE",
+            f"WHERE r.name IN {resource_list_cypher} AND "
+        )
+
+    return cypher_text.strip()
 
 async def generate_llm_response(user_query: str, context: dict):
     context_text = "\n\n".join(

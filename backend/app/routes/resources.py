@@ -61,6 +61,7 @@ class ResourceResponse(BaseModel):
     project_id: UUID
     file_name: str
     file_type: str
+    doc_id: Optional[str]
     file_url: Optional[str]
     parsed_text: Optional[str]
     created_at: datetime

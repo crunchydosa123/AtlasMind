@@ -2,6 +2,7 @@ from fastapi import APIRouter, Depends, HTTPException
 from pydantic import BaseModel
 from supabase import create_client
 import os, jwt
+import requests
 from dotenv import load_dotenv
 from fastapi.security import OAuth2PasswordBearer
 from typing import List
@@ -24,6 +25,8 @@ google_docs_service = GoogleDocsService(creds_path)
 
 SUPABASE_URL = os.environ.get("SUPABASE_URL")
 SUPABASE_KEY = os.environ.get("SUPABASE_KEY")
+GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_OAUTH_CLIENT_ID")
+GOOGLE_CLIENT_SECRET=os.environ.get("GOOGLE_OAUTH_CLIENT_SECRET")
 supabase = create_client(SUPABASE_URL, SUPABASE_KEY)
 oauth2_scheme = OAuth2PasswordBearer(tokenUrl="auth/login")
 
@@ -94,19 +97,87 @@ async def run_workflow(request: WorkflowRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=str(e))
     
-@router.post("/push-to-docs")
-async def push_to_doc(req: PushRequest):
-    print("Raw request body:", req.dict())  # This shows exactly what was sent
+def refresh_google_token(refresh_token: str):
+    """Refresh expired Google OAuth token"""
+    resp = requests.post(
+        "https://oauth2.googleapis.com/token",
+        data={
+            "client_id": GOOGLE_CLIENT_ID,
+            "client_secret": GOOGLE_CLIENT_SECRET,
+            "refresh_token": refresh_token,
+            "grant_type": "refresh_token",
+        },
+    )
+    if resp.status_code != 200:
+        raise Exception(f"Failed to refresh token: {resp.text}")
+    return resp.json()["access_token"]
 
-    DOC_URL = "https://docs.google.com/document/d/1vtMczJJVY0IRsqAawL-ORcBS9Bbc2wv0TaAPrjaU92g/edit"
+def extract_doc_id(doc_url: str):
+    """Extract the Google Doc ID from URL"""
+    import re
+    match = re.search(r"/d/([a-zA-Z0-9-_]+)", doc_url)
+    if not match:
+        raise HTTPException(status_code=400, detail="Invalid Google Doc URL")
+    return match.group(1)
+
+@router.post("/push-to-docs")
+async def push_to_docs(req: PushRequest, user: dict = Depends(get_current_user)):
+    print("Received request:", req.dict())
+    doc_id = extract_doc_id(req.doc_url)
+    print("Extracted doc_id:", doc_id)
+    # 1. Get user tokens from Supabase
+    print(user)
+    user_res = (
+        supabase.table("Users")
+        .select("*")
+        .eq("id", user["id"])
+        .maybe_single()
+        .execute()
+    )
+
+    if not user_res or not user_res.data:
+        print('user not found')
+        raise HTTPException(status_code=400, detail="User not found")
+
+    google_user = user_res.data
+    access_token = google_user["access_token"]
+    refresh_token = google_user["refresh_token"]
+
+    doc_id = extract_doc_id(req.doc_url)
+    headers = {"Authorization": f"Bearer {access_token}"}
+
+    # 2. Try fetching the doc (to check token validity)
+    doc_resp = requests.get(f"https://docs.googleapis.com/v1/documents/{doc_id}", headers=headers)
+    print(doc_resp)
+    if doc_resp.status_code == 401:
+        # Token expired, refresh it
+        access_token = refresh_google_token(refresh_token)
+        # Update Supabase with new access token
+        supabase.table("Users").update({"access_token": access_token}).eq("id", user["id"]).execute()
+        headers = {"Authorization": f"Bearer {access_token}"}
+        doc_resp = requests.get(f"https://docs.googleapis.com/v1/documents/{doc_id}", headers=headers)
+
+    if doc_resp.status_code != 200:
+        print(doc_resp)
+        raise HTTPException(status_code=doc_resp.status_code, detail=doc_resp.text)
+
+    # 3. Append text to the doc
+    doc = doc_resp.json()
+    end_index = doc.get("body", {}).get("content", [])[-1]["endIndex"]
+    requests_body = [{"insertText": {"location": {"index": end_index - 1}, "text": req.text + "\n\n"}}]
+
+    batch_resp = requests.post(
+        f"https://docs.googleapis.com/v1/documents/{doc_id}:batchUpdate",
+        headers={**headers, "Content-Type": "application/json"},
+        json={"requests": requests_body},
+    )
     
-    try:
-        result = google_docs_service.append_text(DOC_URL, req.text)
-        return result
-    except Exception as e:
-        print(e)
-        raise HTTPException(status_code=500, detail=str(e))
-    
+
+    if batch_resp.status_code != 200:
+        print(batch_resp)
+        raise HTTPException(status_code=batch_resp.status_code, detail=batch_resp.text)
+
+    return {"status": "success", "doc_id": doc_id, "text_length": len(req.text)}
 
 @router.post("/send-mail")
 async def send_mail(request: MailRequest):

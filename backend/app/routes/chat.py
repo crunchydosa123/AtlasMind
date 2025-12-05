@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, HTTPException, Request, Query
 from pydantic import BaseModel
 from app.services.llm_service import query_neo4j_with_llm, clean_llm_response, generate_llm_response
 from app.services.projects_service import get_resource_text
@@ -11,15 +11,16 @@ router = APIRouter()
 # Define request body schema
 class LLMQuery(BaseModel):
     query: str
+    selected_resources: list[str] | None = None
 
 @router.post("/cipher")
-async def get_cipher_query(req: LLMQuery):
+async def get_cipher_query(req: LLMQuery, project_id:str = Query(...)):
     """
     Send a natural language query to the LLM to generate a Neo4j Cypher query.
     """
     try:
         # Pass the user query to the LLM service
-        result = await query_neo4j_with_llm(req.query)
+        result = await query_neo4j_with_llm(req.query, project_id=project_id)
         print(result)
 
         query = clean_llm_response(result)
@@ -50,7 +51,7 @@ async def get_cipher_query(req: LLMQuery):
         raise HTTPException(status_code=500, detail=str(e))
     
 @router.post('/llm')
-async def chat_with_context(req: LLMQuery):
+async def chat_with_context(req: LLMQuery, project_id: str = Query(...)):
     """
     Full flow:
     1. Convert user query → Cypher query (via LLM)
@@ -61,7 +62,7 @@ async def chat_with_context(req: LLMQuery):
     """
     try:
         # Step 1: Generate Cypher query using LLM
-        llm_result = await query_neo4j_with_llm(req.query)
+        llm_result = await query_neo4j_with_llm(req.query, project_id, req.selected_resources)
         cypher_query = clean_llm_response(llm_result)
         print(f"🧠 Generated Cypher: {cypher_query}")
 
@@ -109,3 +110,4 @@ async def chat_with_context(req: LLMQuery):
     except Exception as e:
         print(f"❌ Error in /llm route: {e}")
         raise HTTPException(status_code=500, detail=str(e))
+    
