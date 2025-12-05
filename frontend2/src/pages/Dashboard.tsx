@@ -35,6 +35,7 @@ const Dashboard = () => {
       name: project.name,
       doc_url: project.doc_url || "",
     });
+    console.log(project.id);
 
     navigate(`/project/${project.id}`);
   };

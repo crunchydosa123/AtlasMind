@@ -51,27 +51,21 @@ def create_project(tx, project_id, project_name):
 
 def create_resource(tx, resource_id, resource_name, project_id, uploaded_by=None):
     """
-    Create a Resource node, link it to the Project, and optionally to the User who uploaded it.
+    Create a Resource node, link it to Project and optionally User
     """
-    # Basic resource → project
-    query = """
+    tx.run("""
     MERGE (r:Resource {id: $id})
-      SET r.name = $name
-    WITH r
-    MATCH (p:Project {id: $project_id})
+    SET r.name = $name
+    MERGE (p:Project {id: $project_id})
     MERGE (p)-[:HAS_RESOURCE]->(r)
-    """
-    
-    # Optional: link to user
+    """, id=resource_id, name=resource_name, project_id=project_id)
+
     if uploaded_by:
-        query += """
-        WITH r, p
-        MATCH (u:User {id: $uploaded_by})
+        tx.run("""
+        MERGE (u:User {id: $uploaded_by})
+        MERGE (r:Resource {id: $id})
         MERGE (r)-[:UPLOADED_BY]->(u)
-        """
-    
-    tx.run(query, id=str(resource_id), name=resource_name,
-           project_id=str(project_id), uploaded_by=uploaded_by)
+        """, id=resource_id, uploaded_by=uploaded_by)
     
 
 def add_resource_with_concepts(resource_id, resource_name, project_id, concepts, uploaded_by=None):

@@ -10,7 +10,7 @@ const Project = () => {
   const { id, name } = useProjectContext()
   const params = useParams()
   const navigate = useNavigate();
-  console.log("projectId: ", params.id);
+  console.log("projectId from context: ", id);
   return (
     <SidebarProvider>
       <AppSidebar />
