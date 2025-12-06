@@ -36,7 +36,7 @@ function App() {
           <Route path="/project/:id/edit-sheet" element={<Project />} />
           <Route path="/project/:id/llm-query" element={<Project />} />
           <Route path="/project/:id/agents" element={<Agents />} />
-
+          {/*TODO: Fetch agents of a particular project and not all agents*/}
 
           <Route path="/agents" element={<Agents />} />
 
