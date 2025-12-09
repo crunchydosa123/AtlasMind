@@ -9,3 +9,4 @@ def list_tools():
 @router.post("/")
 def add_tool(tool: dict):
     return {"message": "Tool added", "data": tool}
+#TODO: Delete
